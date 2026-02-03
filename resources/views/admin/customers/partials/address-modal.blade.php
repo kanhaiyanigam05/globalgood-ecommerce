@@ -9,13 +9,18 @@
                 <div class="app-form">
                     <div class="row">
                         <div class="col-12 mb-3">
+                            <label class="form-label">Select from existing addresses</label>
+                            <select id="modal_existing_address" class="form-select">
+                                <option value="" selected>New Address</option>
+                            </select>
+                        </div>
+                        <div class="col-12 mb-3">
                             <label class="form-label">Country/region</label>
                             <select id="modal_country" class="form-select">
-                                <option value="India" selected>India</option>
-                                <option value="United States">United States</option>
-                                <option value="United Kingdom">United Kingdom</option>
-                                <option value="Canada">Canada</option>
-                                <option value="Australia">Australia</option>
+                                <option value="" disabled selected>Select a country</option>
+                                @foreach($countries as $country)
+                                    <option value="{{ $country->id }}" data-name="{{ $country->name }}" data-postalcode="{{ $country->postalcode }}" data-zone="{{ $country->zone }}" data-flag="{{ $country->flag_url }}" data-telcode="{{ $country->telcode }}">{{ $country->name }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
@@ -45,30 +50,26 @@
                             <label class="form-label">City</label>
                             <input type="text" id="modal_city" class="form-control" placeholder="">
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">State</label>
+                        <div class="col-md-4 mb-3" id="state_container" style="display: none;">
+                            <label class="form-label" id="state_label">State</label>
                             <select id="modal_province" class="form-select">
                                 <option value="" disabled selected>Select a state</option>
-                                <option value="Delhi">Delhi</option>
-                                <option value="Maharashtra">Maharashtra</option>
-                                <option value="Karnataka">Karnataka</option>
-                                <option value="Tamil Nadu">Tamil Nadu</option>
-                                <option value="Gujarat">Gujarat</option>
-                                <option value="West Bengal">West Bengal</option>
                             </select>
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">PIN code</label>
+                        <div class="col-md-4 mb-3" id="postal_code_container" style="display: none;">
+                            <label class="form-label" id="postal_code_label">PIN code</label>
                             <input type="text" id="modal_zip" class="form-control" placeholder="">
                         </div>
                         <div class="col-12 mb-3">
                             <label class="form-label">Phone</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-white">
-                                    <img src="https://flagcdn.com/w20/in.png" width="20" alt="India">
-                                    <i class="ph ph-caret-down ms-1 f-s-10"></i>
-                                </span>
-                                <input type="text" id="modal_phone" class="form-control" placeholder="">
+                                <div class="position-relative d-flex align-items-center" style="width: 50px;">
+                                    <div class="d-flex align-items-center justify-content-center w-100 h-100 bg-white border rounded-start px-2">
+                                        <img src="{{ asset('flags/untitle.svg') }}" id="modal_phone_flag" width="24" alt="Flag" style="object-fit: contain;">
+                                    </div>
+                                    <input type="hidden" id="modal_phone_code" name="address[tel]">
+                                </div>
+                                <input type="text" id="modal_phone" name="address[phone]" class="form-control" placeholder="123 456 7890">
                             </div>
                         </div>
                     </div>

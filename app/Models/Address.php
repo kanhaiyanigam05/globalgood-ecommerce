@@ -21,6 +21,7 @@ class Address extends Model
         'country',
         'zip',
         'phone',
+        'tel',
         'is_default',
     ];
 

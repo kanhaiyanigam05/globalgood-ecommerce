@@ -7,16 +7,18 @@
                 <!-- Breadcrumb -->
                 <div class="row m-1">
                     <div class="col-12">
-                        <h4 class="main-title">Create order</h4>
+                        <h4 class="main-title">Edit order</h4>
                         <ul class="app-line-breadcrumbs mb-3">
                             <li><a class="f-s-14 f-w-500" href="{{ route('admin.dashboard') }}"><span><i class="ph-duotone ph-house f-s-16"></i> Home</span></a></li>
                             <li><a class="f-s-14 f-w-500" href="{{ route('admin.orders.index') }}"><span><i class="ph-duotone ph-shopping-cart f-s-16"></i> Orders</span></a></li>
-                            <li class="active"><a class="f-s-14 f-w-500" href="#">Create order</a></li>
+                            <li class="active"><a class="f-s-14 f-w-500" href="#">{{ $order->order_number }}</a></li>
                         </ul>
                     </div>
                 </div>
 
-                <x-forms.form :action="route('admin.orders.store')" method="post" id="order-form" class="row">
+                <x-forms.form :action="route('admin.orders.update', $order->id)" method="post" id="order-form" class="row">
+                    @method('PUT')
+                    
                     <div class="col-lg-8">
                         <!-- Products Selection -->
                         <div class="card shadow-sm mb-4">
@@ -55,14 +57,14 @@
                                 <div class="d-flex justify-content-between mb-2 text-primary">
                                     <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#addDiscountModal" id="add-discount-link">Add discount</a>
                                     <span id="summary-discount">—</span>
-                                    <input type="hidden" name="discount_amount" id="input-discount-amount" value="0">
+                                    <input type="hidden" name="discount_amount" id="input-discount-amount" value="{{ $order->discount_amount / 100 }}">
                                 </div>
                                 <div class="d-flex justify-content-between mb-2 text-primary">
                                     <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#addShippingModal" id="add-shipping-link">Add shipping</a>
                                     <span id="summary-shipping">—</span>
-                                    <input type="hidden" name="shipping_amount" id="input-shipping-amount" value="0">
+                                    <input type="hidden" name="shipping_amount" id="input-shipping-amount" value="{{ $order->shipping_amount / 100 }}">
                                 </div>
-                                <div class="d-flex justify-content-between mb-2"><span>Estimated tax</span><span id="summary-tax">Not calculated</span></div>
+                                <div class="d-flex justify-content-between mb-2"><span>Estimated tax</span><span id="summary-tax">₹{{ $order->formatted_tax_amount }}</span></div>
                                 <hr>
                                 <div class="d-flex justify-content-between fw-bold f-s-18"><span>Total</span><span id="summary-total">₹0.00</span></div>
                             </div>
@@ -76,7 +78,7 @@
                                 <h6 class="mb-0">Notes</h6>
                                 <button type="button" class="btn btn-link btn-sm p-0"><i class="ph ph-pencil-simple"></i></button>
                             </div>
-                            <div class="card-body"><textarea name="notes" class="form-control" rows="2" placeholder="No notes"></textarea></div>
+                            <div class="card-body"><textarea name="notes" class="form-control" rows="2" placeholder="No notes">{{ $order->notes }}</textarea></div>
                         </div>
 
                         <!-- Customer Selection -->
@@ -134,13 +136,12 @@
                                 <h6 class="mb-0">Tags</h6>
                                 <button type="button" class="btn btn-link btn-sm p-0"><i class="ph ph-pencil-simple"></i></button>
                             </div>
-                            <div class="card-body"><input type="text" name="tags" class="form-control" placeholder="Search or create tags"></div>
+                            <div class="card-body"><input type="text" name="tags" class="form-control" placeholder="Search or create tags" value="{{ implode(',', $order->tags ?? []) }}"></div>
                         </div>
 
                         <div class="card shadow-sm border-primary">
                             <div class="card-body d-grid gap-2">
-                                <button type="submit" class="btn btn-primary btn-lg">Collect payment</button>
-                                <button type="submit" name="action" value="send_invoice" class="btn btn-outline-secondary">Send invoice</button>
+                                <button type="submit" class="btn btn-primary btn-lg">Update order</button>
                             </div>
                         </div>
                     </div>
@@ -155,7 +156,7 @@
     <!-- Modals -->
     <x-models.product-select id="browseProductsModal" :apiUrl="route('admin.orders.search-products')" />
     
-    <!-- Create Customer Modal -->
+    <!-- Create Customer Modal (Same as Create) -->
     <div class="modal fade" id="createCustomerModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -164,15 +165,13 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- Validation Errors Container -->
                     <div id="create-customer-errors" class="alert alert-danger d-none"></div>
-
                     <form id="create-customer-form">
                         <div class="row g-3 mb-3">
                             <div class="col-md-6"><label class="form-label">First name</label><input type="text" class="form-control" name="first_name" required></div>
                             <div class="col-md-6"><label class="form-label">Last name</label><input type="text" class="form-control" name="last_name" required></div>
                         </div>
-                        <div class="mb-3">
+                         <div class="mb-3">
                              <label class="form-label">Language</label>
                              <select class="form-select" name="language">
                                  <option value="en">English [Default]</option>
@@ -180,7 +179,6 @@
                              <div class="form-text">This customer will receive notifications in this language.</div>
                         </div>
                         <div class="mb-3"><label class="form-label">Email</label><input type="email" class="form-control" name="email" required></div>
-                        
                         <div class="mb-3">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="email_marketing_consent" value="1" id="create-email-marketing">
@@ -191,9 +189,7 @@
                                 <label class="form-check-label" for="create-tax-exempt">Customer is tax exempt</label>
                             </div>
                         </div>
-
                         <hr class="my-4">
-                        
                         <h6 class="fw-bold mb-3">Shipping address</h6>
                         <div class="mb-3"><label class="form-label">Country/region</label>
                             <select class="form-select" name="address[country]" id="create-country-select">
@@ -208,14 +204,12 @@
                         <div class="mb-3"><label class="form-label">Apartment, suite, etc</label><input type="text" class="form-control" name="address[address2]"></div>
                         <div class="row g-3 mb-3">
                              <div class="col-md-4"><label class="form-label">City</label><input type="text" class="form-control" name="address[city]"></div>
-                             
                              <div class="col-md-4" id="create-state-container" style="display: none;">
                                  <label class="form-label" id="create-state-label">State</label>
                                  <select class="form-select" name="address[province]" id="create-province-select">
                                     <option value="" disabled selected>Select a state</option>
                                  </select>
                              </div>
-                             
                              <div class="col-md-4" id="create-postal-container" style="display: none;">
                                 <label class="form-label" id="create-postal-label">PIN code</label>
                                 <input type="text" class="form-control" name="address[zip]" id="create-zip">
@@ -329,11 +323,95 @@
     $(document).ready(function() {
         let itemsCount = 0;
         let selectedCustomer = null;
-        let editingAddressType = 'shipping'; // 'shipping' or 'billing'
-        let billingAddress = null; // Stored object for UI display
-        let currentAddresses = []; // Fetch addresses for modal
+        let editingAddressType = 'shipping'; 
+        let billingAddress = null; 
+        let currentAddresses = []; 
 
-        // -- Product Selection Logic --
+        // --- Data Injection for Edit ---
+        const existingItems = @json($order->items);
+        const existingCustomer = @json($order->customer);
+        const savedShipping = @json($order->shipping_address);
+        const savedBilling = @json($order->billing_address);
+
+        // --- Pre-fill Logic ---
+        
+        // 1. Items
+        if (existingItems && existingItems.length > 0) {
+            $('#empty-items-placeholder').hide();
+            existingItems.forEach(item => {
+                let imgUrl = null;
+                if (item.product && item.product.images) {
+                    const images = Array.isArray(item.product.images) ? item.product.images : Object.values(item.product.images);
+                    if (images.length > 0) imgUrl = images[0].file_url;
+                }
+                
+                addItem({
+                    productId: item.product_id,
+                    variantId: item.variant_id,
+                    name: item.name ?? (item.product ? item.product.title : 'Unknown'),
+                    variantName: item.variant ? item.variant.title : '',
+                    price: item.price / 100,
+                    img: imgUrl,
+                    quantity: item.quantity
+                });
+            });
+        }
+
+        // 2. Customer
+        if (existingCustomer) {
+            selectCustomer(existingCustomer, false); // false = don't auto-set default addresses yet
+            
+            // 3. Addresses - Force Override from Saved Order Data
+            
+            // Try to find matching address IDs for the snapshots
+            if (savedShipping) {
+                updateAddressDisplay(savedShipping, 'shipping');
+                // Attempt to match snapshot with current customer addresses to set ID
+                if (existingCustomer.addresses) {
+                    const match = existingCustomer.addresses.find(a => 
+                        (a.address1 || '').trim().toLowerCase() === (savedShipping.address1 || '').trim().toLowerCase() && 
+                        (a.city || '').trim().toLowerCase() === (savedShipping.city || '').trim().toLowerCase() && 
+                        (a.zip || '').trim().toLowerCase() === (savedShipping.zip || '').trim().toLowerCase()
+                    );
+                    if (match) $('#input-shipping-address-id').val(match.id);
+                }
+            } 
+            
+            if (savedBilling) {
+                updateAddressDisplay(savedBilling, 'billing');
+                if (existingCustomer.addresses) {
+                    const match = existingCustomer.addresses.find(a => 
+                        (a.address1 || '').trim().toLowerCase() === (savedBilling.address1 || '').trim().toLowerCase() && 
+                        (a.city || '').trim().toLowerCase() === (savedBilling.city || '').trim().toLowerCase() && 
+                        (a.zip || '').trim().toLowerCase() === (savedBilling.zip || '').trim().toLowerCase()
+                    );
+                    if (match) {
+                        $('#input-billing-address-id').val(match.id);
+                        billingAddress = match;
+                    } else {
+                        billingAddress = savedBilling;
+                        $('#input-billing-address-id').val('');
+                    }
+                }
+            } else {
+                // ... (check equality logic below)
+            }
+            
+            // Check equality to set "Same as shipping" toggle
+            if (savedShipping && savedBilling && JSON.stringify(savedShipping) === JSON.stringify(savedBilling)) {
+                 $('#billing-same-as-shipping').prop('checked', true);
+                 updateBillingDisplay();
+            } else if (savedShipping && !savedBilling) {
+                 $('#billing-same-as-shipping').prop('checked', true);
+                 updateBillingDisplay();
+            } else {
+                 $('#billing-same-as-shipping').prop('checked', false);
+                 updateBillingDisplay();
+            }
+        }
+
+        // --- Standard Logic (Copied from Create) ---
+
         window.addEventListener('products-selected', function(e) { 
             const items = e.detail.items;
              if (items && items.length > 0) {
@@ -379,6 +457,7 @@
             });
             window.dispatchEvent(new CustomEvent('provide-selection-state', { detail: { selectedIds: currentItems } }));
         });
+
         function addItem(data) {
              $('#empty-items-placeholder').hide();
             const template = $('#order-item-row-template').html();
@@ -388,6 +467,7 @@
             html.find('.input-product-id').val(data.productId || '');
             html.find('.input-variant-id').val(data.variantId || '');
             html.find('.input-price').val(data.price);
+            html.find('.input-quantity').val(data.quantity || 1);
             html.find('.input-item-name').val(data.name);
             if (data.isCustom) html.find('.input-is-custom').val('1');
             
@@ -395,7 +475,6 @@
             updateTotals();
         }
 
-        // --- Customer Logic ---
         const customerSearchInput = $('#customer-search');
         let customerSearchTimeout;
 
@@ -431,7 +510,6 @@
              const modal = new bootstrap.Modal(document.getElementById('createCustomerModal'));
              modal.show();
              $('#customer-search-results').removeClass('show');
-             // Reset Form and Errors
              $('#create-customer-form')[0].reset();
              $('#create-customer-errors').addClass('d-none').html('');
              $('#create-state-container').hide();
@@ -444,7 +522,8 @@
             selectCustomer(typeof customer === 'string' ? JSON.parse(customer) : customer);
         });
 
-        function selectCustomer(customer) {
+        // Modified SelectCustomer to take optional 'setDefaultAddress' flag
+        function selectCustomer(customer, setDefaultAddress = true) {
             selectedCustomer = customer;
             $('#customer-search-wrapper').addClass('d-none');
             $('#selected-customer-info').removeClass('d-none');
@@ -456,22 +535,24 @@
             $('#display-customer-email').text(customer.email || 'No email');
             $('#display-customer-phone').text(customer.phone || 'No phone number');
             
-            // Set Shipping Address (Default)
-            if (customer.default_address) {
-                updateAddressDisplay(customer.default_address, 'shipping');
-                $('#input-shipping-address-id').val(customer.default_address.id);
+            if (setDefaultAddress) {
+                // Set Default Addresses Logic (For Creation or Changing Customer)
+                 if (customer.default_address) {
+                    updateAddressDisplay(customer.default_address, 'shipping');
+                    $('#input-shipping-address-id').val(customer.default_address.id);
+                } else {
+                     updateAddressDisplay(null, 'shipping');
+                     $('#input-shipping-address-id').val('');
+                }
+                // Reset Billing
+                $('#billing-same-check-wrapper').removeClass('d-none');
+                $('#billing-same-as-shipping').prop('checked', true); 
+                billingAddress = null;
+                $('#input-billing-address-id').val('');
+                updateBillingDisplay();
             } else {
-                 updateAddressDisplay(null, 'shipping');
-                 $('#input-shipping-address-id').val('');
+                 // For Edit Mode Initial Load: Do nothing to addresses, let the caller handle it override
             }
-            
-            // Reset Billing
-            $('#billing-same-check-wrapper').removeClass('d-none');
-            $('#billing-same-as-shipping').prop('checked', true); 
-            billingAddress = null;
-            $('#input-billing-address-id').val('');
-
-            updateBillingDisplay();
             $('#customer-search-results').removeClass('show');
         }
 
@@ -496,7 +577,7 @@
             if ($('#billing-same-as-shipping').is(':checked')) {
                 $('#display-billing-address').text('Same as shipping address');
                 $('#edit-billing-address-btn').addClass('d-none');
-                $('#input-billing-address-id').val(''); // Clear ID ensures backend uses shipping
+                $('#input-billing-address-id').val(''); 
             } else {
                  $('#edit-billing-address-btn').removeClass('d-none');
                  updateAddressDisplay(billingAddress, 'billing');
@@ -518,8 +599,6 @@
         
         $('#billing-same-as-shipping').change(function() { updateBillingDisplay(); });
 
-
-        // --- Create Customer Save with Validation ---
          $('#save-new-customer-btn').click(function() {
             const btn = $(this);
             const errorContainer = $('#create-customer-errors');
@@ -546,22 +625,17 @@
                     if (xhr.status === 422) {
                         const errors = xhr.responseJSON.errors;
                         let errorHtml = '<ul class="mb-0">';
-                        for (const key in errors) {
-                            errorHtml += `<li>${errors[key][0]}</li>`;
-                        }
+                        for (const key in errors) errorHtml += `<li>${errors[key][0]}</li>`;
                         errorHtml += '</ul>';
                         errorContainer.html(errorHtml).removeClass('d-none');
-                    } else {
-                        alert('Error: ' + (xhr.responseJSON?.message || 'Unknown error')); 
-                    }
+                    } else { alert('Error: ' + (xhr.responseJSON?.message || 'Unknown error')); }
                 },
                 complete: function() { btn.prop('disabled', false).text('Save'); }
             });
         });
 
-        // --- Create Customer Modal Zone Fetching ---
+        // Zone Fetching for Create Customer
         function fetchZonesForCreate(countryName) {
-            // Find option to get data attributes
             const option = $(`#create-country-select option[value="${countryName}"]`);
             const countryId = option.data('id');
             const postalCodeName = option.data('postalcode');
@@ -587,9 +661,7 @@
                 success: function(data) {
                     let options = '<option value="" disabled selected>Select a state</option>';
                     if(data.length > 0) {
-                        data.forEach(function(zone) {
-                            options += `<option value="${zone.name}">${zone.name}</option>`;
-                        });
+                        data.forEach(function(zone) { options += `<option value="${zone.name}">${zone.name}</option>`; });
                         $('#create-state-container').show();
                     } else { $('#create-state-container').hide(); }
                     $('#create-province-select').html(options);
@@ -599,13 +671,11 @@
         }
         $('#create-country-select').change(function() { fetchZonesForCreate($(this).val()); });
 
-
-        // --- Address Modal Logic ---
+        // Address Modal
         function fetchZones(countryId, selectedProvince = null) {
             const countryOption = $(`#modal_country option[value="${countryId}"]`);
             const flag = countryOption.data('flag');
             const postalCodeName = countryOption.data('postalcode');
-            
              if(flag) $('#modal_phone_flag').attr('src', flag);
              if (postalCodeName) {
                 $('#postal_code_label').text(postalCodeName);
@@ -614,7 +684,6 @@
                 $('#postal_code_container').hide();
                 $('#modal_zip').val('');
             }
-             
              $('#modal_province').html('<option value="" disabled selected>Loading...</option>');
              $('#state_container').show();
 
@@ -641,20 +710,10 @@
         function openAddressModal(type) {
             editingAddressType = type;
             $('#addAddressModalLabel').text(type === 'shipping' ? 'Edit shipping address' : 'Edit billing address');
+            $('#modal_first_name').val(''); $('#modal_last_name').val(''); $('#modal_company').val('');
+            $('#modal_address1').val(''); $('#modal_address2').val(''); $('#modal_city').val('');
+            $('#modal_zip').val(''); $('#modal_phone').val(''); $('#modal_country').val(''); $('#state_container').hide();
             
-            // clear form
-            $('#modal_first_name').val('');
-            $('#modal_last_name').val('');
-            $('#modal_company').val('');
-            $('#modal_address1').val('');
-            $('#modal_address2').val('');
-            $('#modal_city').val('');
-            $('#modal_zip').val('');
-            $('#modal_phone').val('');
-            $('#modal_country').val('');
-            $('#state_container').hide();
-            
-            // Fetch Addresses for Customer
              $.get("{{ route('admin.orders.get-addresses') }}", { customer_id: selectedCustomer.id }, function(addresses) {
                  currentAddresses = addresses;
                  const select = $('#modal_existing_address');
@@ -664,63 +723,53 @@
                      const label = `${addr.first_name} ${addr.last_name}, ${addr.address1}, ${addr.city}` + (addr.is_default ? ' (Default)' : '');
                      select.append(`<option value="${addr.id}">${label}</option>`);
                  });
+                 let currentId = (type === 'shipping') ? $('#input-shipping-address-id').val() : $('#input-billing-address-id').val();
                  
-                 // Pre-select logic
-                 let currentId = null;
-                 if (type === 'shipping') currentId = $('#input-shipping-address-id').val();
-                 else currentId = $('#input-billing-address-id').val();
-                 
-                 // Fallback to customer names if new
-                 if (currentId) {
-                     select.val(currentId);
-                     fillModalForm(currentId);
+                 if (currentId) { 
+                     select.val(currentId.toString()); 
+                     if (select.val() == currentId) {
+                         fillModalForm(currentId); 
+                     } else {
+                         const snapshot = (type === 'shipping') ? savedShipping : (billingAddress || savedBilling);
+                         if (snapshot) fillModalFromSnapshot(snapshot);
+                     }
                  } else {
-                     $('#modal_first_name').val(selectedCustomer.first_name);
-                     $('#modal_last_name').val(selectedCustomer.last_name);
+                     const snapshot = (type === 'shipping') ? savedShipping : (billingAddress || savedBilling);
+                     if (snapshot) {
+                         fillModalFromSnapshot(snapshot);
+                     } else {
+                         $('#modal_first_name').val(selectedCustomer.first_name); 
+                         $('#modal_last_name').val(selectedCustomer.last_name);
+                     }
                  }
                  
                  const modal = new bootstrap.Modal(document.getElementById('addAddressModal'));
                  modal.show();
              });
         }
-
         $('#modal_existing_address').change(function() {
             const val = $(this).val();
-            if (val) {
-                fillModalForm(val);
-            } else {
-                 // Reset form
-                $('#modal_first_name').val(selectedCustomer.first_name);
-                $('#modal_last_name').val(selectedCustomer.last_name);
-                $('#modal_company').val('');
-                $('#modal_address1').val('');
-                $('#modal_address2').val('');
-                $('#modal_city').val('');
-                $('#modal_zip').val('');
-                $('#modal_phone').val('');
-                $('#modal_country').val('');
-                $('#state_container').hide();
+            if (val) fillModalForm(val);
+            else {
+                $('#modal_first_name').val(selectedCustomer.first_name); $('#modal_last_name').val(selectedCustomer.last_name);
+                $('#modal_company').val(''); $('#modal_address1').val(''); $('#modal_address2').val(''); $('#modal_city').val('');
+                $('#modal_zip').val(''); $('#modal_phone').val(''); $('#modal_country').val(''); $('#state_container').hide();
             }
         });
+
+        function fillModalFromSnapshot(addr) {
+             const option = $(`#modal_country option[data-name="${addr.country}"]`);
+             if (option.length) { $('#modal_country').val(option.val()); fetchZones(option.val(), addr.province); }
+             $('#modal_first_name').val(addr.first_name); $('#modal_last_name').val(addr.last_name);
+             $('#modal_company').val(addr.company); $('#modal_address1').val(addr.address1);
+             $('#modal_address2').val(addr.address2); $('#modal_city').val(addr.city);
+             $('#modal_zip').val(addr.zip); $('#modal_phone').val(addr.phone);
+        }
 
         function fillModalForm(addressId) {
              const addr = currentAddresses.find(a => a.id == addressId);
              if (!addr) return;
-             
-             // Country Select
-             const option = $(`#modal_country option[data-name="${addr.country}"]`);
-             if (option.length) {
-                 $('#modal_country').val(option.val());
-                 fetchZones(option.val(), addr.province);
-             }
-             $('#modal_first_name').val(addr.first_name);
-             $('#modal_last_name').val(addr.last_name);
-             $('#modal_company').val(addr.company);
-             $('#modal_address1').val(addr.address1);
-             $('#modal_address2').val(addr.address2);
-             $('#modal_city').val(addr.city);
-             $('#modal_zip').val(addr.zip);
-             $('#modal_phone').val(addr.phone);
+             fillModalFromSnapshot(addr);
         }
 
         $(document).on('click', '#edit-shipping-address-btn, #link-create-address', function(e) {
@@ -733,19 +782,14 @@
         $('#saveAddressBtn').click(function() {
             const btn = $(this);
             btn.prop('disabled', true).text('Saving...');
-            
             const selectedId = $('#modal_existing_address').val();
             const rawData = {
                 country: $('#modal_country option:selected').data('name'),
-                first_name: $('#modal_first_name').val(),
-                last_name: $('#modal_last_name').val(),
-                company: $('#modal_company').val(),
-                address1: $('#modal_address1').val(),
-                address2: $('#modal_address2').val(),
-                city: $('#modal_city').val(),
+                first_name: $('#modal_first_name').val(), last_name: $('#modal_last_name').val(),
+                company: $('#modal_company').val(), address1: $('#modal_address1').val(),
+                address2: $('#modal_address2').val(), city: $('#modal_city').val(),
                 province: $('#state_container').is(':visible') ? $('#modal_province').val() : '',
-                zip: $('#modal_zip').val(),
-                phone: $('#modal_phone').val(),
+                zip: $('#modal_zip').val(), phone: $('#modal_phone').val(),
             };
 
             let hasChanges = false;
@@ -765,18 +809,15 @@
             } else hasChanges = true;
 
             if (!hasChanges && selectedId) {
-                // Use Existing without creating new
                 const addr = currentAddresses.find(a => a.id == selectedId);
                 handleAddressUpdateSuccess(addr);
                 btn.prop('disabled', false).text('Save');
                 return;
             }
 
-            // Create New Address
             const formData = new FormData();
             formData.append('customer_id', selectedCustomer.id);
             for (const key in rawData) formData.append(key, rawData[key]);
-            
             const isDefault = editingAddressType === 'shipping';
             formData.append('is_default', isDefault ? '1' : '0');
 
@@ -787,9 +828,7 @@
                 processData: false,
                 contentType: false,
                 headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'},
-                success: function(response) {
-                    handleAddressUpdateSuccess(response); 
-                },
+                success: function(response) { handleAddressUpdateSuccess(response); },
                 error: function(xhr) { alert('Error: ' + (xhr.responseJSON?.message || 'Unknown error')); },
                 complete: function() { btn.prop('disabled', false).text('Save'); }
             });
@@ -807,7 +846,6 @@
              bootstrap.Modal.getInstance(document.getElementById('addAddressModal')).hide();
         }
 
-        // Utils
         function updateTotals() {
             let subtotal = 0;
             $('.order-item-row').each(function() {
@@ -870,9 +908,7 @@
             updateTotals();
         });
          $(document).on('click', function(e) {
-            if (!$(e.target).closest('#customer-search, #customer-search-results').length) {
-                $('#customer-search-results').removeClass('show');
-            }
+            if (!$(e.target).closest('#customer-search, #customer-search-results').length) $('#customer-search-results').removeClass('show');
         });
     });
 </script>

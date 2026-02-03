@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CollectionController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\VariantController;
 use Illuminate\Support\Facades\Route;
@@ -63,11 +64,15 @@ Route::prefix('management')->as('admin.')->group(function () {
         Route::post('vendor-documents/{id}/verify', [App\Http\Controllers\Admin\VendorController::class, 'verifyDocument'])->name('vendors.verifyDocument');
         Route::post('vendor-bank/{id}/verify', [App\Http\Controllers\Admin\VendorController::class, 'verifyBank'])->name('vendors.verifyBank');
         // Customers
+        Route::get('customers/get-zones', [CustomerController::class, 'getZones'])->name('customers.get-zones');
         Route::resource('customers', CustomerController::class);
 
         // Orders
-        Route::get('orders/search-products', [App\Http\Controllers\Admin\OrderController::class, 'searchProducts'])->name('orders.search-products');
-        Route::get('orders/search-customers', [App\Http\Controllers\Admin\OrderController::class, 'searchCustomers'])->name('orders.search-customers');
-        Route::resource('orders', App\Http\Controllers\Admin\OrderController::class);
+        Route::get('orders/search-products', [OrderController::class, 'searchProducts'])->name('orders.search-products');
+        Route::get('orders/search-customers', [OrderController::class, 'searchCustomers'])->name('orders.search-customers');
+        Route::post('orders/store-customer', [OrderController::class, 'storeCustomer'])->name('orders.store-customer');
+        Route::get('orders/get-addresses', [OrderController::class, 'getAddresses'])->name('orders.get-addresses');
+        Route::post('orders/store-address', [OrderController::class, 'storeAddress'])->name('orders.store-address');
+        Route::resource('orders', OrderController::class);
     });
 });

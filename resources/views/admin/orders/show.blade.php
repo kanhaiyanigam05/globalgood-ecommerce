@@ -8,8 +8,12 @@
                 <div class="d-flex align-items-center gap-2">
                     <a href="{{ route('admin.orders.index') }}" class="btn btn-outline-secondary btn-sm"><i class="ph ph-arrow-left"></i></a>
                     <h4 class="main-title mb-0">{{ $order->order_number }}</h4>
-                    <span class="badge bg-success">Paid</span>
-                    <span class="badge bg-secondary">Unfulfilled</span>
+                    <span class="badge bg-{{ $order->status === 'paid' ? 'success' : ($order->status === 'pending' ? 'warning text-dark' : ($order->status === 'cancelled' ? 'danger' : 'secondary')) }}">
+                        {{ ucfirst($order->status ?? 'Draft') }}
+                    </span>
+                    <span class="badge bg-{{ $order->fulfillment_status === 'fulfilled' ? 'success' : 'secondary' }}">
+                        {{ ucfirst($order->fulfillment_status ?? 'Unfulfilled') }}
+                    </span>
                     <span class="badge bg-light text-dark border">Archived</span>
                 </div>
                 <div class="text-muted small mt-1">
@@ -34,12 +38,16 @@
 
         <div class="row">
             <div class="col-lg-8">
-                <!-- Fulfillment Banner -->
-                <div class="card bg-success-subtle border-success mb-4">
+                <div class="card bg-{{ $order->fulfillment_status === 'fulfilled' ? 'success' : 'warning' }}-subtle border-{{ $order->fulfillment_status === 'fulfilled' ? 'success' : 'warning' }} mb-4">
                     <div class="card-body py-3">
-                        <div class="d-flex align-items-center gap-2 text-success">
-                            <i class="ph-fill ph-check-circle f-s-20"></i>
-                            <span class="fw-medium">Completed</span>
+                        <div class="d-flex align-items-center gap-2 text-{{ $order->fulfillment_status === 'fulfilled' ? 'success' : 'warning' }}">
+                            @if($order->fulfillment_status === 'fulfilled')
+                                <i class="ph-fill ph-check-circle f-s-20"></i>
+                                <span class="fw-medium">Fulfilled</span>
+                            @else
+                                <i class="ph ph-clock f-s-20"></i>
+                                <span class="fw-medium">Pending Fulfillment</span>
+                            @endif
                         </div>
                         <div class="mt-2 small text-dark">
                             Order created on {{ $order->created_at->format('M j, Y, g:i A') }}. You can view the order or <a href="{{ route('admin.orders.create') }}" class="text-decoration-underline">create a new order</a>.
@@ -51,7 +59,9 @@
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-secondary f-s-12 p-1 px-2"><i class="ph ph-package"></i> Unfulfilled</span>
+                            <span class="badge bg-{{ $order->fulfillment_status === 'fulfilled' ? 'success' : 'secondary' }} f-s-12 p-1 px-2">
+                                <i class="ph ph-package"></i> {{ ucfirst($order->fulfillment_status ?? 'Unfulfilled') }}
+                            </span>
                             <span class="fw-medium">Standard Shipping</span>
                         </div>
                         <div class="text-muted small">#{{ $order->order_number }}-F1</div>
@@ -73,7 +83,7 @@
                                             <div class="d-flex align-items-center gap-3">
                                                 <div class="rounded bg-light d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; border: 1px solid #eee;">
                                                     @if($item->product && $item->product->images->count() > 0)
-                                                        <img src="{{ asset('storage/' . $item->product->images->first()->image_path) }}" alt="" class="img-fluid rounded">
+                                                        <img src="{{ $item->product->images->first()->file_url }}" alt="" class="img-fluid rounded">
                                                     @else
                                                         <i class="ph ph-image text-muted f-s-20"></i>
                                                     @endif
@@ -85,7 +95,7 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="text-end">1</td>
+                                        <td class="text-end">{{ $item->quantity }}</td>
                                         <td class="text-end pe-3">₹{{ $item->formatted_total }}</td>
                                     </tr>
                                     @endforeach
@@ -208,7 +218,7 @@
                     <div class="card-body">
                         @if($order->customer)
                             <a href="#" class="fw-medium d-block text-primary mb-1">{{ $order->customer->first_name }} {{ $order->customer->last_name }}</a>
-                            <a href="#" class="small text-decoration-underline mb-3 d-block">1 order</a>
+                            <a href="#" class="small text-decoration-underline mb-3 d-block">Check history</a>
                             
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <h7 class="mb-0 f-s-12 fw-semibold text-muted">CONTACT INFORMATION</h7>
@@ -221,16 +231,33 @@
                                 <h7 class="mb-0 f-s-12 fw-semibold text-muted">SHIPPING ADDRESS</h7>
                                 <button class="btn btn-link btn-sm p-0 text-muted"><i class="ph ph-pencil-simple"></i></button>
                             </div>
-                            <div class="small text-muted mb-1">{{ $order->customer->first_name }} {{ $order->customer->last_name }}</div>
-                            <div class="small text-muted mb-1">A1/102 tower 1</div>
-                            <div class="small text-muted mb-1">201304 Noida UP, India</div>
-                            <div class="small text-muted mb-2">+91 98106 52112</div>
+                            @if($order->shipping_address)
+                                <div class="small text-muted mb-1">{{ $order->shipping_address['first_name'] ?? '' }} {{ $order->shipping_address['last_name'] ?? '' }}</div>
+                                <div class="small text-muted mb-1">{{ $order->shipping_address['address1'] ?? '' }}</div>
+                                @if(!empty($order->shipping_address['address2']))
+                                    <div class="small text-muted mb-1">{{ $order->shipping_address['address2'] }}</div>
+                                @endif
+                                <div class="small text-muted mb-1">{{ $order->shipping_address['zip'] ?? '' }} {{ $order->shipping_address['city'] ?? '' }} {{ $order->shipping_address['province'] ?? '' }}, {{ $order->shipping_address['country'] ?? '' }}</div>
+                                <div class="small text-muted mb-2">{{ $order->shipping_address['phone'] ?? $order->shipping_address['tel'] ?? '' }}</div>
+                            @else
+                                <div class="small text-muted mb-3">No shipping address recorded</div>
+                            @endif
                             <a href="#" class="small text-primary text-decoration-none">View map</a>
 
                             <div class="d-flex justify-content-between align-items-center mt-3 mb-2">
                                 <h7 class="mb-0 f-s-12 fw-semibold text-muted">BILLING ADDRESS</h7>
                             </div>
-                            <div class="small text-muted">Same as shipping address</div>
+                            @if($order->billing_address)
+                                @if(json_encode($order->shipping_address) === json_encode($order->billing_address))
+                                    <div class="small text-muted">Same as shipping address</div>
+                                @else
+                                    <div class="small text-muted mb-1">{{ $order->billing_address['first_name'] ?? '' }} {{ $order->billing_address['last_name'] ?? '' }}</div>
+                                    <div class="small text-muted mb-1">{{ $order->billing_address['address1'] ?? '' }}</div>
+                                    <div class="small text-muted mb-1">{{ $order->billing_address['zip'] ?? '' }} {{ $order->billing_address['city'] ?? '' }} {{ $order->billing_address['province'] ?? '' }}, {{ $order->billing_address['country'] ?? '' }}</div>
+                                @endif
+                            @else
+                                <div class="small text-muted">Same as shipping address</div>
+                            @endif
                         @else
                             <div class="text-muted small">No customer details available</div>
                         @endif

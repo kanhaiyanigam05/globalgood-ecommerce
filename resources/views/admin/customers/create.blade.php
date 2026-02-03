@@ -62,8 +62,28 @@
                                                 required />
                                         </div>
                                         <div class="col-12 mb-3">
-                                            <x-forms.input name="phone" label="Phone number"
-                                                placeholder="Enter Phone Number" :value="old('phone')" :error="$errors->first('phone')" />
+                                            <label class="form-label">Phone number</label>
+                                            <div class="input-group">
+                                                <div class="position-relative d-flex align-items-center" style="width: 80px;">
+                                                    <div class="d-flex align-items-center justify-content-center w-100 h-100 bg-white border rounded-start px-2">
+                                                        <img src="{{ asset('flags/untitle.svg') }}" id="main_phone_flag" width="24" alt="Flag" style="object-fit: contain;">
+                                                        <i class="ph ph-caret-down ms-2 f-s-12 text-muted"></i>
+                                                    </div>
+                                                    <select class="form-select position-absolute top-0 start-0 w-100 h-100 opacity-0" name="phone_code" id="phone_code_select" style="cursor: pointer; z-index: 10;">
+                                                        @foreach($countries as $country)
+                                                            <option value="{{ $country->telcode }}" data-flag="{{ $country->flag_url }}" {{ $country->name == 'United States' ? 'selected' : '' }}>
+                                                                {{ $country->name }} ({{ $country->telcode }})
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <input type="text" class="form-control" name="phone" id="phone_number_input" placeholder="+1 123 456 7890" value="{{ old('phone') }}">
+                                            </div>
+                                            @if($errors->has('phone'))
+                                                <div class="invalid-feedback d-block">
+                                                    {{ $errors->first('phone') }}
+                                                </div>
+                                            @endif
                                         </div>
                                         <div class="col-12">
                                             <div class="form-check mb-2">
@@ -172,38 +192,142 @@
     $(document).ready(function() {
         const modal = new bootstrap.Modal(document.getElementById('addAddressModal'));
 
+        // Function to fetch zones
+        function fetchZones(countryId, selectedProvince = null) {
+            if (!countryId) {
+                $('#modal_province').html('<option value="" disabled selected>Select a state</option>');
+                $('#state_container').hide();
+                return;
+            }
+            
+            // Get data from selected option
+            const selectedOption = $(`#modal_country option[value="${countryId}"]`);
+            const postalCodeName = selectedOption.data('postalcode');
+            const zoneName = selectedOption.data('zone');
+            const flagUrl = selectedOption.data('flag');
+            const telCode = selectedOption.data('telcode'); // Ensure adding data-telcode to modal options first (wait, did I?)
+            
+            // PIPELINE: Update Labels/Visibility based on Country Data
+            
+            // 0. Flag & Tel Code
+            if (flagUrl) {
+                $('#modal_phone_flag').attr('src', flagUrl);
+            }
+            if (telCode) {
+                 $('#modal_phone_code').val(telCode);
+            }
+
+            // 1. Postal Code
+            if (postalCodeName) {
+                $('#postal_code_label').text(postalCodeName);
+                $('#postal_code_container').show();
+            } else {
+                $('#postal_code_container').hide();
+                $('#modal_zip').val(''); // Clear value if hidden
+            }
+
+            // 2. Zone/State Label
+            if (zoneName) {
+                $('#state_label').text(zoneName);
+            } else {
+                $('#state_label').text('State'); // Default
+            }
+
+            $('#modal_province').html('<option value="" disabled selected>Loading...</option>');
+            
+            $.ajax({
+                url: "{{ route('admin.customers.get-zones') }}",
+                type: "GET",
+                data: { country_id: countryId },
+                success: function(data) {
+                    let options = '<option value="" disabled selected>Select a state</option>';
+                    if(data.length > 0) {
+                        data.forEach(function(zone) {
+                            const isSelected = selectedProvince && zone.name === selectedProvince ? 'selected' : '';
+                            options += `<option value="${zone.name}" ${isSelected}>${zone.name}</option>`;
+                        });
+                        $('#state_container').show();
+                    } else {
+                        // If no zones, hide the state container
+                         $('#state_container').hide();
+                         $('#modal_province').val(''); // Clear value
+                    }
+                    $('#modal_province').html(options);
+                },
+                error: function() {
+                     $('#modal_province').html('<option value="" disabled selected>Select a state</option>');
+                     $('#state_container').hide();
+                }
+            });
+        }
+
+        $('#modal_country').change(function() {
+            fetchZones($(this).val());
+            const flag = $(this).find('option:selected').data('flag');
+            if(flag) $('#modal_phone_flag').attr('src', flag);
+        });
+
         // Handle Pencil Icon Click (Edit)
         $(document).on('click', '.ph-pencil[data-bs-target="#addAddressModal"]', function() {
             // Pre-fill modal with existing hidden input values
-            $('#modal_country').val($('input[name="address[country]"]').val() || 'India');
+            const currentCountryName = $('input[name="address[country]"]').val();
+            const currentProvince = $('input[name="address[province]"]').val();
+            
+            // Set Country
+            if (currentCountryName) {
+                const option = $(`#modal_country option[data-name="${currentCountryName}"]`);
+                if (option.length) {
+                    $('#modal_country').val(option.val());
+                    fetchZones(option.val(), currentProvince);
+                } else {
+                    $('#modal_country').val('');
+                    $('#modal_province').html('<option value="" disabled selected>Select a state</option>');
+                    $('#state_container').hide();
+                }
+            } else {
+                 $('#modal_country').val('');
+                 $('#modal_province').html('<option value="" disabled selected>Select a state</option>');
+                 $('#state_container').hide();
+            }
+
             $('#modal_first_name').val($('input[name="address[first_name]"]').val());
             $('#modal_last_name').val($('input[name="address[last_name]"]').val());
             $('#modal_company').val($('input[name="address[company]"]').val());
             $('#modal_address1').val($('input[name="address[address1]"]').val());
             $('#modal_address2').val($('input[name="address[address2]"]').val());
             $('#modal_city').val($('input[name="address[city]"]').val());
-            $('#modal_province').val($('input[name="address[province]"]').val());
+            // province handled by fetchZones
             $('#modal_zip').val($('input[name="address[zip]"]').val());
             $('#modal_phone').val($('input[name="address[phone]"]').val());
         });
 
         $('#saveAddressBtn').on('click', function() {
+            // Check visibility before validating
+            const isPostalCodeVisible = $('#postal_code_container').is(':visible');
+            const isStateVisible = $('#state_container').is(':visible');
+
             const addressData = {
-                country: $('#modal_country').val(),
+                country: $('#modal_country option:selected').data('name'),
                 first_name: $('#modal_first_name').val(),
                 last_name: $('#modal_last_name').val(),
                 company: $('#modal_company').val(),
                 address1: $('#modal_address1').val(),
                 address2: $('#modal_address2').val(),
                 city: $('#modal_city').val(),
-                province: $('#modal_province').val(),
-                zip: $('#modal_zip').val(),
-                phone: $('#modal_phone').val()
+                province: isStateVisible ? $('#modal_province').val() : '',
+                zip: isPostalCodeVisible ? $('#modal_zip').val() : '',
+                zip: isPostalCodeVisible ? $('#modal_zip').val() : '',
+                phone: $('#modal_phone').val(),
+                tel: $('#modal_phone_code').val()
             };
 
             // Basic validation
             if (!addressData.address1 || !addressData.city || !addressData.country) {
-                window.toast.error('Please fill in required address fields (Address, City, Country)');
+                if (window.toast) {
+                    window.toast.error('Please fill in required address fields (Address, City, Country)');
+                } else {
+                    alert('Please fill in required address fields (Address, City, Country)');
+                }
                 return;
             }
 
@@ -213,9 +337,9 @@
                 ${addressData.company ? `<div>${addressData.company}</div>` : ''}
                 <div>${addressData.address1}</div>
                 ${addressData.address2 ? `<div>${addressData.address2}</div>` : ''}
-                <div>${addressData.zip} ${addressData.city}</div>
+                <div>${addressData.zip ? addressData.zip + ' ' : ''}${addressData.city}</div>
                 <div>${addressData.province ? addressData.province + ', ' : ''}${addressData.country}</div>
-                <div>${addressData.phone}</div>
+                <div>${addressData.tel} ${addressData.phone}</div>
             `;
             
             $('#address_summary_text').html(summaryHtml);
@@ -234,6 +358,22 @@
             // Close Modal
             bootstrap.Modal.getInstance(document.getElementById('addAddressModal')).hide();
         });
+
+        // One-time initialization logic
+        updateMainFlag();
+        
+        function updateMainFlag() {
+            const flag = $('#phone_code_select option:selected').data('flag');
+            if(flag) {
+                $('#main_phone_flag').attr('src', flag);
+            }
+        }
+
+        $('#phone_code_select').change(function() {
+            updateMainFlag();
+        });
+        
+
     });
 </script>
 @endpush

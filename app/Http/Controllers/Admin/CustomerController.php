@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\HtmlString;
 use Yajra\DataTables\DataTables;
 
+use App\Models\Country;
+use App\Models\CountryZone;
+
 class CustomerController extends Controller
 {
     public function index(Request $request)
@@ -62,12 +65,13 @@ class CustomerController extends Controller
 
     public function create()
     {
-        return view('admin.customers.create');
+        $countries = Country::all();
+        return view('admin.customers.create', compact('countries'));
     }
 
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $rules = [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:customers,email',
@@ -75,8 +79,30 @@ class CustomerController extends Controller
             'language' => 'nullable|string',
             'notes' => 'nullable|string',
             'tags' => 'nullable|string',
+            'tel' => 'nullable|string|max:10',
             'tax_setting' => 'nullable|string',
-        ]);
+        ];
+
+        if ($request->has('address')) {
+             $rules = array_merge($rules, [
+                'address.first_name' => 'required|string|max:255',
+                'address.last_name' => 'required|string|max:255',
+                'address.address1' => 'required|string|max:255',
+                'address.city' => 'required|string|max:255',
+                'address.country' => 'required|string|max:255',
+                'address.zip' => 'required|string|max:20',
+                'address.phone' => 'nullable|string|max:20',
+                'address.company' => 'nullable|string|max:255',
+                'address.address2' => 'nullable|string|max:255',
+                'address.province' => 'nullable|string|max:255',
+             ]);
+        }
+
+        if ($request->has('phone_code')) {
+            $request->merge(['tel' => $request->phone_code]);
+        }
+
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
@@ -87,6 +113,7 @@ class CustomerController extends Controller
         if ($request->has('address')) {
             $addressData = $request->input('address');
             $addressData['is_default'] = true;
+            // Ensure tel is set if passed in address array (JS needs to handle this)
             $customer->addresses()->create($addressData);
         }
 
@@ -102,14 +129,19 @@ class CustomerController extends Controller
     public function edit(string $id)
     {
         $customer = Customer::findOrFail(Crypt::decryptString($id));
-        return view('admin.customers.edit', compact('customer'));
+        $countries = Country::all();
+        return view('admin.customers.edit', compact('customer', 'countries'));
     }
 
     public function update(Request $request, string $id)
     {
         $customer = Customer::findOrFail(Crypt::decryptString($id));
 
-        $validator = Validator::make($request->all(), [
+        if ($request->has('phone_code')) {
+            $request->merge(['tel' => $request->phone_code]);
+        }
+
+        $rules = [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:customers,email,' . $customer->id,
@@ -118,7 +150,23 @@ class CustomerController extends Controller
             'notes' => 'nullable|string',
             'tags' => 'nullable|string',
             'tax_setting' => 'nullable|string',
-        ]);
+        ];
+
+        if ($request->has('address')) {
+             $rules = array_merge($rules, [
+                'address.first_name' => 'required|string|max:255',
+                'address.last_name' => 'required|string|max:255',
+                'address.address1' => 'required|string|max:255',
+                'address.city' => 'required|string|max:255',
+                'address.country' => 'required|string|max:255',
+                'address.zip' => 'required|string|max:20',
+                'address.phone' => 'nullable|string|max:20',
+                'address.company' => 'nullable|string|max:255',
+                'address.address2' => 'nullable|string|max:255',
+                'address.province' => 'nullable|string|max:255']);
+        }
+
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
@@ -146,5 +194,16 @@ class CustomerController extends Controller
         $customer->delete();
 
         return redirect()->route('admin.customers.index')->with('success', 'Customer deleted successfully.');
+    }
+
+    public function getZones(Request $request)
+    {
+        $request->validate([
+            'country_id' => 'required',
+        ]);
+
+        $zones = CountryZone::where('country_id', $request->country_id)->get();
+
+        return response()->json($zones);
     }
 }
