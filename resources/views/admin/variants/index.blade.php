@@ -1,0 +1,113 @@
+@extends('admin.layouts.app')
+@push('styles:before')
+    <!-- Data Table css-->
+    <link href="{{ asset('admins/vendor/datatable/jquery.dataTables.min.css') }}" rel="stylesheet" type="text/css">
+@endpush
+@section('content')
+    <div class="container-fluid">
+        <!-- Breadcrumb start -->
+        <div class="row m-1">
+            <div class="col-12 ">
+                <h4 class="main-title">All Variants</h4>
+                <ul class="app-line-breadcrumbs mb-3">
+                    <li class="">
+                        <a class="f-s-14 f-w-500" href="{{ route('admin.dashboard') }}">
+                            <span>
+                                <i class="ph-duotone ph-table f-s-16"></i> Dashboard
+                            </span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a class="f-s-14 f-w-500" href="#">All Variants</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Breadcrumb end -->
+
+        <!-- Data Table start -->
+        <div class="row">
+            <!-- Default Datatable start -->
+            <div class="col-12">
+                <div class="card ">
+                    <div class="card-header d-flex justify-content-between">
+                        <h5>Product Variants</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="app-datatable-default overflow-auto">
+                            <table class="display app-data-table" id="variant-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Product</th>
+                                        <th>SKU</th>
+                                        <th>Attributes</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Default Datatable end -->
+        </div>
+        <!-- Data Table end -->
+    </div>
+@endsection
+@push('scripts:before')
+    <!-- Data Table js-->
+    <script src="{{ asset('admins/vendor/datatable/jquery.dataTables.min.js') }}"></script>
+@endpush
+@push('scripts:after')
+    <script>
+        $(function() {
+            $('#variant-table').DataTable({
+                ajax: "{{ route('admin.variants.all') }}",
+                processing: true,
+                serverSide: true,
+                columns: [{
+                        data: 'DT_RowIndex',
+                        name: 'id'
+                    },
+                    {
+                        data: 'product',
+                        name: 'product.title'
+                    },
+                    {
+                        data: 'sku',
+                        name: 'sku'
+                    },
+                    {
+                        data: 'attributes',
+                        name: 'attributes',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'price',
+                        name: 'price'
+                    },
+                    {
+                        data: 'quantity',
+                        name: 'quantity'
+                    },
+                    {
+                        data: 'status',
+                        name: 'status'
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false
+                    },
+                ]
+            });
+        });
+    </script>
+@endpush
