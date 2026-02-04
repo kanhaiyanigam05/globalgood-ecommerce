@@ -1,0 +1,98 @@
+@extends('admin.layouts.app')
+@push('styles:before')
+    <!-- Data Table css-->
+    <link href="{{ asset('admins/vendor/datatable/jquery.dataTables.min.css') }}" rel="stylesheet" type="text/css">
+@endpush
+@section('content')
+    <div class="container-fluid">
+        <!-- Breadcrumb start -->
+        <div class="row m-1">
+            <div class="col-12 ">
+                <h4 class="main-title">Attribute Values</h4>
+                <ul class="app-line-breadcrumbs mb-3">
+                    <li class="">
+                        <a class="f-s-14 f-w-500" href="{{ route('admin.dashboard') }}">
+                            <span>
+                                <i class="ph-duotone ph-table f-s-16"></i> Dashboard
+                            </span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a class="f-s-14 f-w-500" href="#">Attribute Values</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Breadcrumb end -->
+
+        <!-- Data Table start -->
+        <div class="row">
+            <!-- Default Datatable start -->
+            <div class="col-12">
+                <div class="card ">
+                    <div class="card-header d-flex justify-content-between">
+                        <h5>Attribute Values</h5>
+                        <a href="{{ route('admin.attribute-values.create') }}" class="btn btn-primary">Add Attribute
+                            Value</a>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="app-datatable-default overflow-auto">
+                            <table class="display app-data-table" id="attribute-value-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Attribute</th>
+                                        <th>Value</th>
+                                        <th>Code</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Default Datatable end -->
+        </div>
+        <!-- Data Table end -->
+    </div>
+@endsection
+@push('scripts:before')
+    <!-- Data Table js-->
+    <script src="{{ asset('admins/vendor/datatable/jquery.dataTables.min.js') }}"></script>
+@endpush
+@push('scripts:after')
+    <script>
+        $(function() {
+            $('#attribute-value-table').DataTable({
+                ajax: "{{ route('admin.attribute-values.index') }}",
+                processing: true,
+                serverSide: true,
+                columns: [{
+                        data: 'id',
+                        name: 'id'
+                    },
+                    {
+                        data: 'attribute.name',
+                        name: 'attribute.name'
+                    },
+                    {
+                        data: 'value',
+                        name: 'value'
+                    },
+                    {
+                        data: 'code',
+                        name: 'code'
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false
+                    },
+                ]
+            });
+        });
+    </script>
+@endpush
