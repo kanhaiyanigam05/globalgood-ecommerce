@@ -29,7 +29,7 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $products = Product::with(['category', 'images', 'vendor.profile'])->select('products.*');
+            $products = Product::with(['category', 'vendor.profile'])->select('products.*');
 
             if ($request->has('vendor_id') && $request->vendor_id) {
                 $products->where('vendor_id', $request->vendor_id);
@@ -40,8 +40,7 @@ class ProductController extends Controller
                 ->editColumn('title', fn ($row) => Str::limit($row->title, 30))
                 ->addColumn('image', function ($row) {
                     $image = $row->firstImage();
-                    $src = $image ? $image->file_url : "https://placehold.co/100x100?text={$row->title}"; // Fallback image?
-
+                    $src = $image ? $image->file_url : "https://placehold.co/100x100?text=" . urlencode($row->title);
                     return '<img src="'.$src.'" class="img-thumbnail" width="50">';
                 })
                 ->addColumn('category', fn ($row) => $row->category?->title ?? '-')
@@ -157,6 +156,7 @@ class ProductController extends Controller
             'quantity' => 'required|integer|min:0',
             'short_description' => 'nullable|string',
             'description' => 'nullable|string',
+            'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'meta_title' => 'nullable|string|max:255',
             'meta_keywords' => 'nullable|string',
@@ -260,7 +260,7 @@ class ProductController extends Controller
                 $product->attributes()->sync($syncData);
             }
 
-            // Handle images
+            // Handle Images
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $file) {
                     $path = ImageHelper::store($file, 'products');
@@ -282,17 +282,8 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        $product = Product::with(['images', 'attributes', 'variants.attributes'])->findOrFail(Crypt::decryptString($id));
+        $product = Product::with(['attributes', 'variants.attributes', 'images'])->findOrFail(Crypt::decryptString($id));
         $categories = $this->getHierarchicalCategories();
-
-        // Format images for the file component
-        $images = $product->images->map(function ($img) {
-            return [
-                'path' => $img->file,
-                'name' => basename($img->file),
-                'type' => 'image',
-            ];
-        })->toArray();
 
         // Get product-scoped attributes with values
         $productAttributes = \App\Models\Attribute::where('scope', \App\Enums\Scope::PRODUCT)
@@ -355,7 +346,6 @@ class ProductController extends Controller
         return view('admin.products.edit', compact(
             'product', 
             'categories', 
-            'images', 
             'productAttributes', 
             'variantAttributes',
             'initialOptions',
@@ -483,11 +473,13 @@ class ProductController extends Controller
                 $product->attributes()->sync($syncData);
             }
 
-            // Handle existing images deletion
-            $existingFiles = $request->input('existing_files', []);
-            foreach ($product->images as $img) {
-                if (! in_array($img->file, $existingFiles)) {
-                    $img->delete();
+            // Handle existing files deletion
+            if ($request->has('delete_images')) {
+                foreach ($request->delete_images as $imageId) {
+                    $image = $product->images()->find($imageId);
+                    if ($image) {
+                        $image->delete();
+                    }
                 }
             }
 

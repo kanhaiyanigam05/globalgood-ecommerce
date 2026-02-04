@@ -58,12 +58,12 @@ class Product extends Model
     }
     public function setPriceAttribute($value)
     {
-        $this->attributes['price'] = (int) round($value * 100);
+        $this->setAttribute('price', (int) round($value * 100));
     }
 
     public function setCompareAtPriceAttribute($value)
     {
-        $this->attributes['compare_at_price'] = (int) round($value * 100);
+        $this->setAttribute('compare_at_price', (int) round($value * 100));
     }
 
     public function category()

@@ -11,6 +11,8 @@ class Collection extends Model
 {
     use HandlesSmartCollections;
 
+
+
     protected $fillable = [
         'title',
         'slug',

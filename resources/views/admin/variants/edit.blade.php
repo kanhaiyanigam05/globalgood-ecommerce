@@ -119,7 +119,7 @@
             <div class="col-md-3 col-lg-2 variant-sidebar">
                 <div class="variant-info-top">
                     <div class="d-flex align-items-center gap-2">
-                        <img src="{{ $product->firstImage() ? $product->firstImage()->file_url : 'https://placehold.co/40x40' }}" class="rounded" width="100">
+                        <img src="{{ $product->firstImage() ? route('file.path', ['path' => $product->firstImage()->file, 'w' => 100]) : 'https://placehold.co/40x40' }}" class="rounded" width="100">
                         <div class="flex-grow-1 min-w-0">
                             <h6 class="mb-0 text-truncate f-s-13 text-wrap">{{ $product->title }}</h6>
                             <span class="badge {{ $product->status ? 'text-bg-success' : 'text-bg-danger' }} f-s-10">
@@ -155,7 +155,7 @@
                         <a href="{{ route('admin.products.variants.edit', [$encryptedProductId, $vEncryptedId]) }}"
                             class="variant-item {{ $v->id == $variant->id ? 'active' : '' }}"
                             data-title="{{ strtolower($vTitle) }}">
-                            <img src="{{ $product->firstImage() ? $product->firstImage()->file_url : 'https://placehold.co/40x40' }}">
+                            <img src="{{ $product->firstImage() ? route('file.path', ['path' => $product->firstImage()->file, 'w' => 40, 'h' => 40]) : 'https://placehold.co/40x40' }}">
                             <div class="text-truncate flex-grow-1">
                                 <p class="mb-0 f-w-500 f-s-12 text-truncate text-dark">{{ $vTitle }}</p>
                                 <p class="mb-0 text-muted f-s-11">{{ $v->quantity }} available</p>

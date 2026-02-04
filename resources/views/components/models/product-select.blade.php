@@ -60,7 +60,7 @@
             </div>
             <div class="modal-footer justify-content-between px-4 py-3 border-top">
                 <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-bold">
+                    <span class="badge bg-light bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-bold">
                         <span id="{{ $id }}-selected-count">0</span> items selected
                     </span>
                 </div>

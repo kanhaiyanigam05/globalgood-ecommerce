@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\ImageHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
@@ -27,8 +28,7 @@ class CategoryController extends Controller
                 ->addIndexColumn()
                 ->editColumn('title', fn ($row) => ucwords($row->title ?? '-'))
                 ->editColumn('image', function ($row) {
-                    $src = $row->image ? asset("uploads/{$row->image}") : "https://placehold.co/100x100?text={$row->title}"; // Fallback image?
-                    return '<img src="'.$src.'" class="img-thumbnail" width="50">';
+                    return '<img src="https://placehold.co/100x100?text=' . urlencode($row->title) . '" class="img-thumbnail" width="50">';
                 })
                 ->editColumn('products_count', fn ($row) => $row->products_count)
                 ->editColumn('children_count', fn ($row) => $row->children_count)
@@ -106,7 +106,7 @@ class CategoryController extends Controller
             'title' => 'required|string|max:255|unique:categories,title',
             'slug' => 'nullable|string|max:255|unique:categories,slug',
             'parent_id' => 'nullable|exists:categories,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+
             'description' => 'nullable|string',
             'meta_title' => 'nullable|string|max:255',
             'meta_keywords' => 'nullable|string',
@@ -130,12 +130,13 @@ class CategoryController extends Controller
         // Set default status if not provided
         $data['status'] = $request->has('status') ? 1 : 0;
 
-        // Handle image upload (will be processed by model mutator)
+        // Handle image upload
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image');
+            $data['image'] = ImageHelper::store($request->file('image'), 'categories');
         }
-
         $category = Category::create($data);
+
+
 
         return redirect()->route('admin.categories.index')
             ->with('success', 'Category created successfully.');
@@ -169,7 +170,7 @@ class CategoryController extends Controller
             'title' => ['required', 'string', 'max:255', Rule::unique('categories', 'title')->ignore($category->id)],
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('categories', 'slug')->ignore($category->id)],
             'parent_id' => ['nullable', 'exists:categories,id', 'not_in:'.$category->id],
-            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'description' => ['nullable', 'string'],
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_keywords' => 'nullable|string',
@@ -192,15 +193,14 @@ class CategoryController extends Controller
         // Set status
         $data['status'] = $request->has('status') ? 1 : 0;
 
-        // Handle image upload (will be processed by model mutator)
+        // Handle image upload
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image');
-        } elseif (! $request->has('keep_image')) {
-            // If no new image and not keeping old one, remove it
-            unset($data['image']);
+            $data['image'] = ImageHelper::update($request->file('image'), 'categories', $category->image);
         }
 
         $category->update($data);
+
+
 
         return redirect()->route('admin.categories.index')
             ->with('success', 'Category updated successfully.');

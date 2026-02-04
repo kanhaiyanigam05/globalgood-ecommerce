@@ -75,9 +75,9 @@
                                         </div>
                                         <div class="col-12 mb-3">
                                             <x-forms.file name="images" label="Product Images"
-                                                placeholder="Upload Product Images" :value="$images" :error="$errors->first('images')" multiple />
-                                            <small class="text-muted">Upload multiple images (JPEG, PNG, GIF, WebP - Max 2MB
-                                                each)</small>
+                                                :value="$product->images->map(fn($img) => ['path' => $img->file, 'name' => basename($img->file), 'type' => 'image', 'id' => $img->id])->toArray()"
+                                                :error="$errors->first('images')" multiple accept="image/*" />
+                                            <small class="text-muted">Upload high-quality images for your product.</small>
                                         </div>
                                         <div class="col-12 mb-3">
                                             <x-forms.textarea id="short_description" rows="3" name="short_description"

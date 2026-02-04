@@ -72,6 +72,42 @@
                     </div>
 
                     <div class="col-lg-4">
+                        <!-- Status Management -->
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-white">
+                                <h6 class="mb-0">Status</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Order status</label>
+                                    <select name="order_status" class="form-select">
+                                        <option value="open" {{ $order->order_status === 'open' ? 'selected' : '' }}>Open</option>
+                                        <option value="archived" {{ $order->order_status === 'archived' ? 'selected' : '' }}>Archived</option>
+                                        <option value="canceled" {{ $order->order_status === 'canceled' ? 'selected' : '' }}>Canceled</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Payment status</label>
+                                    <select name="payment_status" class="form-select">
+                                        <option value="pending" {{ $order->payment_status === 'pending' ? 'selected' : '' }}>Pending</option>
+                                        <option value="paid" {{ $order->payment_status === 'paid' ? 'selected' : '' }}>Paid</option>
+                                        <option value="partially_paid" {{ $order->payment_status === 'partially_paid' ? 'selected' : '' }}>Partially paid</option>
+                                        <option value="refunded" {{ $order->payment_status === 'refunded' ? 'selected' : '' }}>Refunded</option>
+                                        <option value="voided" {{ $order->payment_status === 'voided' ? 'selected' : '' }}>Voided</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label">Fulfillment status</label>
+                                    <select name="fulfillment_status" class="form-select">
+                                        <option value="unfulfilled" {{ ($order->fulfillment_status === 'unfulfilled' || !$order->fulfillment_status) ? 'selected' : '' }}>Unfulfilled</option>
+                                        <option value="fulfilled" {{ $order->fulfillment_status === 'fulfilled' ? 'selected' : '' }}>Fulfilled</option>
+                                        <option value="partially_fulfilled" {{ $order->fulfillment_status === 'partially_fulfilled' ? 'selected' : '' }}>Partially fulfilled</option>
+                                        <option value="restocked" {{ $order->fulfillment_status === 'restocked' ? 'selected' : '' }}>Restocked</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Notes -->
                         <div class="card shadow-sm mb-4">
                             <div class="card-header bg-white d-flex justify-content-between align-items-center">

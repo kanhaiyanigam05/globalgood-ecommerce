@@ -10,6 +10,8 @@ class Vendor extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+
+
     protected $fillable = [
         'legal_name',
         'display_name',

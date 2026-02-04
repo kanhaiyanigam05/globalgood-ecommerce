@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
+
+
     protected $fillable = [
         'parent_id',
         'title',
@@ -18,51 +20,6 @@ class Category extends Model
         'meta_description',
         'status',
     ];
-
-    protected $casts = [
-        'id' => 'integer',
-        'parent_id' => 'integer',
-        'status' => 'boolean',
-    ];
-
-    /**
-     * Boot the model
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        // Handle image deletion when category is deleted
-        static::deleting(function ($category) {
-            if ($category->image) {
-                ImageHelper::destroy($category->image);
-            }
-        });
-    }
-
-    /**
-     * Set the image attribute and handle file upload
-     *
-     * @param  mixed  $value
-     * @return void
-     */
-    public function setImageAttribute($value)
-    {
-        // If value is an UploadedFile, handle the upload
-        if ($value instanceof \Illuminate\Http\UploadedFile) {
-            $existingImage = $this->attributes['image'] ?? null;
-            $this->attributes['image'] = ImageHelper::store($value, 'categories', $existingImage);
-        }
-        // If value is null and we're clearing the image
-        elseif (is_null($value) && isset($this->attributes['image'])) {
-            ImageHelper::destroy($this->attributes['image']);
-            $this->attributes['image'] = null;
-        }
-        // Otherwise, just set the value (for existing paths)
-        else {
-            $this->attributes['image'] = $value;
-        }
-    }
 
     public function parent()
     {

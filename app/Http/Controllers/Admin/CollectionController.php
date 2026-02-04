@@ -23,8 +23,7 @@ class CollectionController extends Controller
             return DataTables::of($collections)
                 ->addIndexColumn()
                 ->editColumn('image', function ($row) {
-                    $src = $row->image ? asset('storage/' . $row->image) : "https://placehold.co/100x100?text={$row->title}";
-                    return '<img src="'.$src.'" class="img-thumbnail" width="50">';
+                    return '<img src="https://placehold.co/100x100?text=' . urlencode($row->title) . '" class="img-thumbnail" width="50">';
                 })
                 ->addColumn('products_count', fn ($row) => $row->products()->count())
                 ->addColumn('type', function ($row) {
@@ -66,7 +65,7 @@ class CollectionController extends Controller
             'title' => 'required|string|max:255',
             'type' => 'required|in:manual,smart',
             'condition_type' => 'required_if:type,smart|nullable|in:all,any',
-            'image' => 'nullable|image|max:2048',
+
             'conditions' => 'required_if:type,smart|array',
             'conditions.*.field' => 'required_with:conditions|string',
             'conditions.*.operator' => 'required_with:conditions|string',
@@ -87,11 +86,9 @@ class CollectionController extends Controller
             $data = $request->only(['title', 'description', 'type', 'condition_type', 'status']);
             $data['status'] = $request->has('status') ? 1 : 0;
             
-            if ($request->hasFile('image')) {
-                $data['image'] = ImageHelper::store($request->file('image'), 'collections');
-            }
-
             $collection = Collection::create($data);
+
+
 
             if ($collection->type === 'smart' && $request->has('conditions')) {
                 foreach ($request->conditions as $cond) {
@@ -125,7 +122,8 @@ class CollectionController extends Controller
             'title' => 'required|string|max:255',
             'type' => 'required|in:manual,smart',
             'condition_type' => 'required_if:type,smart|nullable|in:all,any',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+
             'conditions' => 'required_if:type,smart|array',
             'conditions.*.field' => 'required_with:conditions|string',
             'conditions.*.operator' => 'required_with:conditions|string',
@@ -143,14 +141,16 @@ class CollectionController extends Controller
         }
 
         return DB::transaction(function () use ($request, $collection) {
-            $data = $request->only(['title', 'description', 'type', 'condition_type', 'status']);
+            $data = $request->only(['title', 'description', 'type', 'condition_type', 'status', 'image']);
             $data['status'] = $request->has('status') ? 1 : 0;
 
             if ($request->hasFile('image')) {
-                $data['image'] = ImageHelper::store($request->file('image'), 'collections', $collection->image);
+                $data['image'] = ImageHelper::update($request->file('image'), 'collections', $collection->image);
             }
 
             $collection->update($data);
+
+
 
             if ($collection->type === 'smart') {
                 $collection->conditions()->delete();

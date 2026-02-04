@@ -41,7 +41,8 @@
                                         <th>Order</th>
                                         <th>Date</th>
                                         <th>Customer</th>
-                                        <th>Status</th>
+                                        <th>Payment</th>
+                                        <th>Fulfillment</th>
                                         <th>Total</th>
                                         <th>Action</th>
                                     </tr>
@@ -84,8 +85,12 @@
                         name: 'customer.first_name'
                     },
                     {
-                        data: 'status',
-                        name: 'status'
+                        data: 'payment_status',
+                        name: 'payment_status'
+                    },
+                    {
+                        data: 'fulfillment_status',
+                        name: 'fulfillment_status'
                     },
                     {
                         data: 'total',

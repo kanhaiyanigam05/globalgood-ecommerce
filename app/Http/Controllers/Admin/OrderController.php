@@ -25,17 +25,35 @@ class OrderController extends Controller
                 ->addColumn('customer_name', function ($order) {
                     return $order->customer ? $order->customer->first_name . ' ' . $order->customer->last_name : ($order->email ?: 'Guest');
                 })
-                ->editColumn('status', function ($order) {
+                ->editColumn('order_status', function ($order) {
                     $badges = [
-                        'draft' => 'secondary',
+                        'open' => 'primary',
+                        'archived' => 'secondary',
+                        'canceled' => 'danger',
+                    ];
+                    $color = $badges[$order->order_status] ?? 'secondary';
+                    return '<span class="badge bg-' . $color . '">' . ucfirst($order->order_status) . '</span>';
+                })
+                ->editColumn('payment_status', function ($order) {
+                    $badges = [
                         'pending' => 'warning',
                         'paid' => 'success',
                         'partially_paid' => 'info',
                         'refunded' => 'danger',
                         'voided' => 'dark',
                     ];
-                    $color = $badges[$order->status] ?? 'secondary';
-                    return '<span class="badge bg-' . $color . '">' . ucfirst($order->status) . '</span>';
+                    $color = $badges[$order->payment_status] ?? 'secondary';
+                    return "<span class=\"badge bg-$color\">" . ucfirst($order->payment_status) . '</span>';
+                })
+                ->editColumn('fulfillment_status', function ($order) {
+                    $badges = [
+                        'unfulfilled' => 'info',
+                        'fulfilled' => 'success',
+                        'partially_fulfilled' => 'warning',
+                        'restocked' => 'secondary',
+                    ];
+                    $color = $badges[$order->fulfillment_status] ?? 'secondary';
+                    return '<span class="badge bg-' . $color . '">' . ucfirst($order->fulfillment_status ?? 'Unfulfilled') . '</span>';
                 })
                 ->editColumn('total', function ($order) {
                     return $order->currency . ' ' . $order->formatted_total;
@@ -46,7 +64,7 @@ class OrderController extends Controller
                         <button type="button" class="btn btn-sm btn-outline-danger delete-order" data-id="' . $order->id . '"><i class="fas fa-trash"></i></button>
                     </div>';
                 })
-                ->rawColumns(['status', 'action'])
+                ->rawColumns(['order_status', 'payment_status', 'fulfillment_status', 'action'])
                 ->make(true);
         }
         return view('admin.orders.index');
@@ -146,7 +164,9 @@ class OrderController extends Controller
                 'shipping_amount' => $shippingAmount,
                 'discount_amount' => $discountAmount,
                 'total' => $total,
-                'status' => 'pending', 
+                'order_status' => 'open',
+                'payment_status' => 'pending',
+                'fulfillment_status' => 'unfulfilled',
                 'payment_gateway' => 'manual',
                 'notes' => $request->notes,
                 'tags' => $request->tags ? array_map('trim', explode(',', $request->tags)) : [],
@@ -196,6 +216,9 @@ class OrderController extends Controller
             'discount_amount' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string',
             'tags' => 'nullable|string',
+            'order_status' => 'nullable|string|in:open,archived,canceled',
+            'payment_status' => 'nullable|string|in:pending,paid,partially_paid,refunded,voided',
+            'fulfillment_status' => 'nullable|string|in:unfulfilled,fulfilled,partially_fulfilled,restocked',
         ]);
 
         try {
@@ -265,6 +288,9 @@ class OrderController extends Controller
                 'total' => $total,
                 'notes' => $request->notes,
                 'tags' => $request->tags ? array_map('trim', explode(',', $request->tags)) : [],
+                'order_status' => $request->input('order_status', $order->order_status),
+                'payment_status' => $request->input('payment_status', $order->payment_status),
+                'fulfillment_status' => $request->input('fulfillment_status', $order->fulfillment_status),
                 'shipping_address' => $shippingAddressData ? $shippingAddressData->toArray() : $order->shipping_address, 
                 'billing_address' => $billingAddressData ? ($billingAddressData instanceof \App\Models\Address ? $billingAddressData->toArray() : $billingAddressData) : $order->billing_address,
             ]);
@@ -433,6 +459,43 @@ class OrderController extends Controller
             return response()->json($customer); 
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error updating address', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function fulfill(Order $order)
+    {
+        if ($order->fulfillment_status === 'fulfilled') {
+            return back()->with('error', 'Order is already fulfilled.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $order->update([
+                'fulfillment_status' => 'fulfilled',
+                'payment_status' => 'paid'
+            ]);
+
+            foreach ($order->items as $item) {
+                if ($item->variant_id) {
+                    $variant = Variant::find($item->variant_id);
+                    if ($variant) {
+                        $variant->decrement('quantity', $item->quantity);
+                    }
+                } elseif ($item->product_id) {
+                    $product = Product::find($item->product_id);
+                    if ($product) {
+                        $product->decrement('quantity', $item->quantity);
+                    }
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('admin.orders.show', $order)->with('success', 'Order fulfilled successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Error fulfilling order: ' . $e->getMessage());
         }
     }
 }

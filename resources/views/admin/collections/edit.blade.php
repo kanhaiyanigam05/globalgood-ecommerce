@@ -164,7 +164,7 @@
                                         <tbody>
                                             @forelse($collection->products as $product)
                                                 <tr>
-                                                    <td><img src="{{ $product->firstImage() ? $product->firstImage()->file_url : 'https://placehold.co/40x40' }}" width="40" height="40" class="rounded border"></td>
+                                                    <td><img src="{{ $product->firstImage() ? route('file.path', ['path' => $product->firstImage()->file, 'w' => 40, 'h' => 40]) : 'https://placehold.co/40x40' }}" width="40" height="40" class="rounded border"></td>
                                                     <td>
                                                         <div class="fw-medium">{{ $product->title }}</div>
                                                         <input type="hidden" name="product_ids[]" value="{{ $product->id }}">
@@ -213,14 +213,12 @@
                             <div class="card-header bg-white">
                                 <h6 class="mb-0">Collection image</h6>
                             </div>
-                            <div class="card-body text-center">
-                                @if($collection->image)
-                                    <div class="mb-3 position-relative d-inline-block">
-                                        <img src="{{ asset('storage/' . $collection->image) }}" class="img-thumbnail" style="max-height: 200px;">
-                                    </div>
-                                @endif
-                                <x-forms.file name="image" label="" :error="$errors->first('image')" />
-                                <p class="small text-muted mt-2">Upload a new image to change the current one.</p>
+                            <div class="card-body">
+                                <x-forms.file name="image" label="Collection Image"
+                                    :value="$collection->image"
+                                    :error="$errors->first('image')" 
+                                    accept="image/*" />
+                                <p class="small text-muted mt-2">Upload or select an image to change the current one.</p>
                             </div>
                         </div>
 

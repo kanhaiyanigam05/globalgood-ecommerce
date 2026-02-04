@@ -196,9 +196,11 @@
                             <div class="card-header bg-white">
                                 <h6 class="mb-0">Collection image</h6>
                             </div>
-                            <div class="card-body text-center">
-                                <x-forms.file name="image" label="" :error="$errors->first('image')" />
-                                <p class="small text-muted mt-2">Upload an image to represent this collection.</p>
+                            <div class="card-body">
+                                <x-forms.file name="image" label="Collection Image"
+                                    :error="$errors->first('image')" 
+                                    accept="image/*" />
+                                <p class="small text-muted mt-2">Upload or select an image to represent this collection.</p>
                             </div>
                         </div>
 

@@ -40,7 +40,7 @@ class ProductImage extends Model
 
     public function getFileUrlAttribute()
     {
-        return asset("uploads/{$this->file}");
+        return route('file.path', ['path' => $this->file]);
     }
 
     public function product()
