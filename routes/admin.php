@@ -7,7 +7,6 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CollectionController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
-
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\VariantController;
@@ -59,8 +58,6 @@ Route::prefix('management')->as('admin.')->group(function () {
         Route::get('collections/search-products', [CollectionController::class, 'searchProducts'])->name('collections.search-products');
         Route::resource('collections', CollectionController::class);
 
-
-
         // Vendors
         Route::resource('vendors', App\Http\Controllers\Admin\VendorController::class)->only(['index', 'show']);
         Route::post('vendors/{id}/status', [App\Http\Controllers\Admin\VendorController::class, 'updateStatus'])->name('vendors.updateStatus');
@@ -69,7 +66,6 @@ Route::prefix('management')->as('admin.')->group(function () {
         // Customers
         Route::get('customers/get-zones', [CustomerController::class, 'getZones'])->name('customers.get-zones');
         Route::resource('customers', CustomerController::class);
-
         // Orders
         Route::get('orders/search-products', [OrderController::class, 'searchProducts'])->name('orders.search-products');
         Route::get('orders/search-customers', [OrderController::class, 'searchCustomers'])->name('orders.search-customers');

@@ -28,7 +28,9 @@ class CategoryController extends Controller
                 ->addIndexColumn()
                 ->editColumn('title', fn ($row) => ucwords($row->title ?? '-'))
                 ->editColumn('image', function ($row) {
-                    return '<img src="https://placehold.co/100x100?text=' . urlencode($row->title) . '" class="img-thumbnail" width="50">';
+                    $src = $row->image ? asset("uploads/{$row->image}") : "https://placehold.co/100x100?text={$row->title}"; // Fallback image?
+
+                    return '<img src="'.$src.'" class="img-thumbnail" width="50">';
                 })
                 ->editColumn('products_count', fn ($row) => $row->products_count)
                 ->editColumn('children_count', fn ($row) => $row->children_count)
@@ -136,8 +138,6 @@ class CategoryController extends Controller
         }
         $category = Category::create($data);
 
-
-
         return redirect()->route('admin.categories.index')
             ->with('success', 'Category created successfully.');
     }
@@ -199,8 +199,6 @@ class CategoryController extends Controller
         }
 
         $category->update($data);
-
-
 
         return redirect()->route('admin.categories.index')
             ->with('success', 'Category updated successfully.');

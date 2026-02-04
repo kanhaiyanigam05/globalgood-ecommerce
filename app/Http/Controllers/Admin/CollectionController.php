@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 use Yajra\DataTables\DataTables;
 
 class CollectionController extends Controller
@@ -23,11 +22,14 @@ class CollectionController extends Controller
             return DataTables::of($collections)
                 ->addIndexColumn()
                 ->editColumn('image', function ($row) {
-                    return '<img src="https://placehold.co/100x100?text=' . urlencode($row->title) . '" class="img-thumbnail" width="50">';
+                    $src = $row->image ? asset('storage/'.$row->image) : "https://placehold.co/100x100?text={$row->title}";
+
+                    return '<img src="'.$src.'" class="img-thumbnail" width="50">';
                 })
                 ->addColumn('products_count', fn ($row) => $row->products()->count())
                 ->addColumn('type', function ($row) {
                     $badge = $row->type === 'smart' ? 'info' : 'secondary';
+
                     return '<span class="badge bg-'.$badge.'">'.ucfirst($row->type).'</span>';
                 })
                 ->addColumn('status', function ($row) {
@@ -41,8 +43,8 @@ class CollectionController extends Controller
                     return '<div class="d-flex gap-2">
                         <a href="'.$editUrl.'" class="btn btn-light-warning icon-btn b-r-4"><i class="far fa-edit text-warning"></i></a>
                         <form action="'.$deleteUrl.'" method="POST" class="d-inline border-0 p-0 m-0 bg-transparent">
-                            ' . csrf_field() . '
-                            ' . method_field('DELETE') . '
+                            '.csrf_field().'
+                            '.method_field('DELETE').'
                             <button type="submit" class="btn btn-light-danger icon-btn b-r-4 delete-confirm"><i class="far fa-trash-alt text-danger"></i></button>
                         </form>
                     </div>';
@@ -85,14 +87,12 @@ class CollectionController extends Controller
         return DB::transaction(function () use ($request) {
             $data = $request->only(['title', 'description', 'type', 'condition_type', 'status']);
             $data['status'] = $request->has('status') ? 1 : 0;
-            
+
             $collection = Collection::create($data);
-
-
 
             if ($collection->type === 'smart' && $request->has('conditions')) {
                 foreach ($request->conditions as $cond) {
-                    if (!empty($cond['field']) && !empty($cond['operator'])) {
+                    if (! empty($cond['field']) && ! empty($cond['operator'])) {
                         $collection->conditions()->create($cond);
                     }
                 }
@@ -111,6 +111,7 @@ class CollectionController extends Controller
     public function edit($id)
     {
         $collection = Collection::with(['products', 'conditions'])->findOrFail(Crypt::decryptString($id));
+
         return view('admin.collections.edit', compact('collection'));
     }
 
@@ -150,13 +151,11 @@ class CollectionController extends Controller
 
             $collection->update($data);
 
-
-
             if ($collection->type === 'smart') {
                 $collection->conditions()->delete();
                 if ($request->has('conditions')) {
                     foreach ($request->conditions as $cond) {
-                        if (!empty($cond['field']) && !empty($cond['operator'])) {
+                        if (! empty($cond['field']) && ! empty($cond['operator'])) {
                             $collection->conditions()->create($cond);
                         }
                     }
@@ -177,6 +176,7 @@ class CollectionController extends Controller
     {
         $collection = Collection::findOrFail(Crypt::decryptString($id));
         $collection->delete();
+
         return redirect()->route('admin.collections.index')->with('success', 'Collection deleted successfully');
     }
 

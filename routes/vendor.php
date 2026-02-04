@@ -1,11 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\AttributeController;
+use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Vendor\AuthController;
 use App\Http\Controllers\Vendor\DashboardController;
-
 use App\Http\Controllers\Vendor\ProductController;
-use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\AttributeController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('vendor')->as('vendor.')->group(function () {
@@ -28,8 +27,6 @@ Route::prefix('vendor')->as('vendor.')->group(function () {
         // Shared Data (Categories & Attributes)
         Route::get('/categories/hierarchical-data', [CategoryController::class, 'fetchHierarchicalData'])->name('categories.hierarchical_data');
         Route::get('attributes/by-category', [AttributeController::class, 'getAttributesByCategory'])->name('attributes.by-category');
-        
-
 
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
     });
