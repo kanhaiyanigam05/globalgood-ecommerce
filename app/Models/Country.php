@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +15,17 @@ class Country extends Model
         'postalcode',
         'zone',
     ];
+
+    protected $appends = [
+        'flag_url',
+    ];
+
+    public function getFlagUrlAttribute()
+    {
+        $flag = $this->flag ?? 'untitle.svg';
+
+        return asset("flags/{$flag}");
+    }
 
     public function zones()
     {

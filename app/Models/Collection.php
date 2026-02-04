@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
+use App\Traits\HandlesSmartCollections;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
-
-use App\Traits\HandlesSmartCollections;
 
 class Collection extends Model
 {

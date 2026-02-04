@@ -42,27 +42,26 @@
                             <div class="row">
                                 <div class="col-12 mb-3">
                                     <x-forms.hierarchical-select id="parent_id" name="parent_id" label="Parent Category"
-                                        varient="floating" placeholder="Select a category"
-                                        searchPlaceholder="Search categories..." :options="$categories"
-                                        apiUrl="{{ route('admin.categories.hierarchical_data') }}" :value="old('parent_id', $category->parent_id)"
-                                        :error="$errors->first('parent_id')" required />
+                                        placeholder="Select a category" searchPlaceholder="Search categories..."
+                                        :options="$categories" apiUrl="{{ route('admin.categories.hierarchical_data') }}"
+                                        :value="old('parent_id', $category->parent_id)" :error="$errors->first('parent_id')" required />
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <x-forms.input id="title" varient="floating" name="title" label="Title"
+                                    <x-forms.input id="title" name="title" label="Title"
                                         placeholder="Enter Category Title" :value="old('title', $category->title)" :error="$errors->first('title')" required />
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <x-forms.input id="slug" varient="floating" name="slug" label="Slug"
+                                    <x-forms.input id="slug" name="slug" label="Slug"
                                         placeholder="Enter Category Slug" :value="old('slug', $category->slug)" :error="$errors->first('slug')" required />
                                 </div>
+
                                 <div class="col-12 mb-3">
-                                    <x-forms.file name="image" label="Image" placeholder="Enter Category Image"
-                                        :value="old('image', $category->image)" :error="$errors->first('image')" />
+                                    <x-forms.file id="image" name="image" label="Image" :value="old('image', $category->image)"
+                                        :error="$errors->first('image')" />
                                 </div>
                                 <div class="col-12 mb-3">
-                                    <x-forms.editor id="description" rows="4" varient="floating" name="description"
-                                        label="Description" placeholder="Enter Category Description" :value="old('description', $category->description)"
-                                        :error="$errors->first('description')" />
+                                    <x-forms.editor id="description" rows="4" name="description" label="Description"
+                                        placeholder="Enter Category Description" :value="old('description', $category->description)" :error="$errors->first('description')" />
                                 </div>
                             </div>
                         </div>
@@ -78,17 +77,16 @@
                         <div class="app-form">
                             <div class="row">
                                 <div class="col-12 mb-3">
-                                    <x-forms.input varient="floating" name="meta_title" label="Meta Title"
-                                        placeholder="Enter meta title" :value="old('meta_title', $category->meta_title)" :error="$errors->first('meta_title')" />
+                                    <x-forms.input name="meta_title" label="Meta Title" placeholder="Enter meta title"
+                                        :value="old('meta_title', $category->meta_title)" :error="$errors->first('meta_title')" />
                                 </div>
                                 <div class="col-12 mb-3">
-                                    <x-forms.input varient="floating" name="meta_keywords" label="Meta Keywords"
+                                    <x-forms.input name="meta_keywords" label="Meta Keywords"
                                         placeholder="Enter meta keywords" :value="old('meta_keywords', $category->meta_keywords)" :error="$errors->first('meta_keywords')" />
                                 </div>
                                 <div class="col-12 mb-3">
-                                    <x-forms.textarea rows="3" varient="floating" name="meta_description"
-                                        label="Meta Description" placeholder="Enter meta description" :value="old('meta_description', $category->meta_description)"
-                                        :error="$errors->first('meta_description')" />
+                                    <x-forms.textarea rows="3" name="meta_description" label="Meta Description"
+                                        placeholder="Enter meta description" :value="old('meta_description', $category->meta_description)" :error="$errors->first('meta_description')" />
                                 </div>
                                 <div class="col-12">
                                     <div class="text-end">

@@ -59,14 +59,13 @@
             <p>Drag & drop or <span>browse</span></p>
         </div>
 
-        {{-- SINGLE SHARED CONTAINER --}}
         <div class="x-file-preview">
             @foreach ($files as $file)
                 <div class="x-preview-item" data-existing="true">
                     <button type="button" class="x-preview-close">&times;</button>
 
                     @if (Str::startsWith($file['type'], 'image'))
-                        <img src="{{ asset('uploads/' . $file['path']) }}">
+                        <img src="{{ route('file.path', ['path' => $file['path'], 'h' => 100]) }}" />
                     @else
                         <div class="file-icon"><i class="fa-solid fa-file"></i></div>
                         <p class="mt-1 text-truncate">{{ $file['name'] }}</p>

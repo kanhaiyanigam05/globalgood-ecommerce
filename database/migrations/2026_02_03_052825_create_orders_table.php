@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('customer_id')->nullable()->constrained()->onDelete('set null');
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
-            
+
             // Totals (Stored as cents/paise)
             $table->integer('items_count')->default(0);
             $table->bigInteger('subtotal')->default(0);
@@ -25,26 +25,26 @@ return new class extends Migration
             $table->bigInteger('shipping_amount')->default(0);
             $table->bigInteger('tax_amount')->default(0);
             $table->bigInteger('total')->default(0);
-            
+
             $table->string('currency')->default('USD');
-            
+
             // Statuses
             $table->string('status')->default('draft'); // draft, pending, paid, partially_paid, refunded, voided
             $table->string('fulfillment_status')->default('unfulfilled'); // unfulfilled, partially_fulfilled, fulfilled, restocked
-            
+
             // Addresses (Snapshots or References)
             $table->text('shipping_address')->nullable();
             $table->text('billing_address')->nullable();
-            
+
             // Notes & Tags
             $table->text('notes')->nullable();
             $table->text('admin_notes')->nullable();
             $table->json('tags')->nullable();
-            
+
             // Payment info
             $table->string('payment_gateway')->nullable();
             $table->string('payment_method')->nullable();
-            
+
             $table->softDeletes();
             $table->timestamps();
         });

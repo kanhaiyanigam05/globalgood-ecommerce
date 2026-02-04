@@ -9,12 +9,12 @@ class Order extends Model
     use \Illuminate\Database\Eloquent\SoftDeletes;
 
     protected $fillable = [
-        'order_number', 'customer_id', 'email', 'phone', 
+        'order_number', 'customer_id', 'email', 'phone',
         'subtotal', 'discount_amount', 'shipping_amount', 'tax_amount', 'total',
-        'currency', 'status', 'fulfillment_status',
+        'currency', 'status', 'order_status', 'payment_status', 'fulfillment_status',
         'shipping_address', 'billing_address',
         'notes', 'admin_notes', 'tags',
-        'payment_gateway', 'payment_method'
+        'payment_gateway', 'payment_method',
     ];
 
     protected $casts = [
@@ -99,11 +99,11 @@ class Order extends Model
     protected static function booted()
     {
         static::creating(function ($order) {
-            if (!$order->order_number) {
+            if (! $order->order_number) {
                 // Initial order number generation
                 $latest = static::latest()->first();
                 $lastId = $latest ? (int) str_replace('#', '', $latest->order_number) : 1000;
-                $order->order_number = '#' . ($lastId + 1);
+                $order->order_number = '#'.($lastId + 1);
             }
         });
     }

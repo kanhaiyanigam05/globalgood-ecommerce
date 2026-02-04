@@ -1,10 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\AttributeController;
+use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Vendor\AuthController;
 use App\Http\Controllers\Vendor\DashboardController;
 use App\Http\Controllers\Vendor\ProductController;
-use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\AttributeController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('vendor')->as('vendor.')->group(function () {

@@ -15,6 +15,7 @@ class Customer extends Authenticatable
         'last_name',
         'email',
         'phone',
+        'tel',
         'language',
         'email_marketing_consent',
         'sms_marketing_consent',

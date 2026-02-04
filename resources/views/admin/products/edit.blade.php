@@ -65,7 +65,10 @@
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <x-forms.input type="number" step="0.01" name="compare_at_price"
-                                                label="Compare At Price ($)" placeholder="0.00" :value="old('compare_at_price', $product->compare_at_price_formatted)"
+                                                label="Compare At Price ($)" placeholder="0.00" :value="old(
+                                                    'compare_at_price',
+                                                    $product->compare_at_price_formatted,
+                                                )"
                                                 :error="$errors->first('compare_at_price')" />
                                             <small class="text-muted">Original price before discount</small>
                                         </div>
@@ -74,10 +77,18 @@
                                                 placeholder="0" :value="old('quantity', $product->quantity)" :error="$errors->first('quantity')" required />
                                         </div>
                                         <div class="col-12 mb-3">
-                                            <x-forms.file name="images" label="Product Images"
-                                                placeholder="Upload Product Images" :value="$images" :error="$errors->first('images')" multiple />
-                                            <small class="text-muted">Upload multiple images (JPEG, PNG, GIF, WebP - Max 2MB
-                                                each)</small>
+                                            <x-forms.file name="images" label="Product Images" :value="$product->images
+                                                ->map(
+                                                    fn($img) => [
+                                                        'path' => $img->file,
+                                                        'name' => basename($img->file),
+                                                        'type' => 'image',
+                                                        'id' => $img->id,
+                                                    ],
+                                                )
+                                                ->toArray()"
+                                                :error="$errors->first('images')" multiple accept="image/*" />
+                                            <small class="text-muted">Upload high-quality images for your product.</small>
                                         </div>
                                         <div class="col-12 mb-3">
                                             <x-forms.textarea id="short_description" rows="3" name="short_description"
@@ -117,22 +128,27 @@
                         </div>
 
                         <!-- Product Attributes Card -->
-                        <div class="card mt-3" id="product-attributes-wrapper" style="{{ count($productAttributes) > 0 ? '' : 'display:none;' }}">
+                        <div class="card mt-3" id="product-attributes-wrapper"
+                            style="{{ count($productAttributes) > 0 ? '' : 'display:none;' }}">
                             <div class="card-header">
                                 <h5><i class="ph-duotone ph-list-bullets"></i> Product Attributes</h5>
                             </div>
                             <div class="card-body">
                                 <div class="app-form" id="product-attributes-container">
                                     @php
-                                        $selectedProductAttrs = $product->attributes->pluck('pivot.value', 'id')->toArray();
+                                        $selectedProductAttrs = $product->attributes
+                                            ->pluck('pivot.value', 'id')
+                                            ->toArray();
                                     @endphp
                                     @foreach ($productAttributes as $attr)
                                         <div class="mb-3 attribute-item" data-id="{{ $attr->id }}">
                                             <label class="form-label">{{ $attr->name }}</label>
-                                            <select class="form-select form-select-sm" name="product_attributes[{{ $attr->id }}]">
+                                            <select class="form-select form-select-sm"
+                                                name="product_attributes[{{ $attr->id }}]">
                                                 <option value="">Select {{ $attr->name }}</option>
                                                 @foreach ($attr->values as $val)
-                                                    <option value="{{ $val->value }}" {{ (isset($selectedProductAttrs[$attr->id]) && $selectedProductAttrs[$attr->id] == $val->value) ? 'selected' : '' }}>
+                                                    <option value="{{ $val->value }}"
+                                                        {{ isset($selectedProductAttrs[$attr->id]) && $selectedProductAttrs[$attr->id] == $val->value ? 'selected' : '' }}>
                                                         {{ $val->value }}
                                                     </option>
                                                 @endforeach
@@ -296,8 +312,10 @@
                 attributes.forEach(attr => {
                     let optionsHtml = `<option value="">Select ${attr.name}</option>`;
                     attr.values.forEach(val => {
-                        const selected = currentSelections[attr.id] === val.value ? 'selected' : '';
-                        optionsHtml += `<option value="${val.value}" ${selected}>${val.value}</option>`;
+                        const selected = currentSelections[attr.id] === val.value ? 'selected' :
+                            '';
+                        optionsHtml +=
+                            `<option value="${val.value}" ${selected}>${val.value}</option>`;
                     });
 
                     const attrHtml = `

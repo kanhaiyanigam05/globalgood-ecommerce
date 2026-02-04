@@ -2,9 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
 use App\Traits\HandlesSmartCollections;
+use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
@@ -56,14 +55,15 @@ class Product extends Model
     {
         return number_format($this->compare_at_price / 100, 2, '.', '');
     }
+
     public function setPriceAttribute($value)
     {
-        $this->attributes['price'] = (int) round($value * 100);
+        $this->setAttribute('price', (int) round($value * 100));
     }
 
     public function setCompareAtPriceAttribute($value)
     {
-        $this->attributes['compare_at_price'] = (int) round($value * 100);
+        $this->setAttribute('compare_at_price', (int) round($value * 100));
     }
 
     public function category()
@@ -97,6 +97,7 @@ class Product extends Model
     {
         return $this->belongsTo(Vendor::class, 'vendor_id');
     }
+
     protected static function boot()
     {
         parent::boot();

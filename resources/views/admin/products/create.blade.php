@@ -74,10 +74,9 @@
                                                 placeholder="0" :value="old('quantity')" :error="$errors->first('quantity')" required />
                                         </div>
                                         <div class="col-12 mb-3">
-                                            <x-forms.file name="images" label="Product Images"
-                                                placeholder="Upload Product Images" :error="$errors->first('images')" multiple />
-                                            <small class="text-muted">Upload multiple images (JPEG, PNG, GIF, WebP - Max 2MB
-                                                each)</small>
+                                            <x-forms.file name="images" label="Product Images" :error="$errors->first('images')" multiple
+                                                accept="image/*" />
+                                            <small class="text-muted">Upload high-quality images for your product.</small>
                                         </div>
                                         <div class="col-12 mb-3">
                                             <x-forms.textarea id="short_description" rows="3" name="short_description"

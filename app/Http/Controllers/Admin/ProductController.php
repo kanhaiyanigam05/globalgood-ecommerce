@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\Scope;
 use App\Helpers\ImageHelper;
 use App\Http\Controllers\Controller;
-use App\Models\Category;
-use App\Models\Product;
 use App\Models\Attribute;
 use App\Models\AttributeValue;
+use App\Models\Category;
+use App\Models\Product;
 use App\Models\Variant;
-use App\Enums\Scope;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -157,6 +157,7 @@ class ProductController extends Controller
             'quantity' => 'required|integer|min:0',
             'short_description' => 'nullable|string',
             'description' => 'nullable|string',
+            'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'meta_title' => 'nullable|string|max:255',
             'meta_keywords' => 'nullable|string',
@@ -191,7 +192,7 @@ class ProductController extends Controller
             if ($request->has('variant_options')) {
                 foreach ($request->variant_options as $option) {
                     $attribute = null;
-                    if (!empty($option['attribute_id'])) {
+                    if (! empty($option['attribute_id'])) {
                         $attribute = Attribute::find($option['attribute_id']);
                     } else {
                         $attribute = Attribute::firstOrCreate(
@@ -201,16 +202,16 @@ class ProductController extends Controller
 
                     if ($attribute) {
                         // Connect attribute to category if not already connected
-                        if (!$attribute->categories()->where('category_id', $product->category_id)->exists()) {
+                        if (! $attribute->categories()->where('category_id', $product->category_id)->exists()) {
                             $attribute->categories()->attach($product->category_id);
                         }
 
                         // Handle new values for this attribute
-                        if (!empty($option['values'])) {
+                        if (! empty($option['values'])) {
                             foreach ($option['values'] as $value) {
                                 AttributeValue::firstOrCreate([
                                     'attribute_id' => $attribute->id,
-                                    'value' => $value
+                                    'value' => $value,
                                 ]);
                             }
                         }
@@ -229,19 +230,19 @@ class ProductController extends Controller
                     ]);
 
                     // Attach attributes to this variant
-                    if (!empty($variantData['attributes'])) {
-                        $attributesJson = is_string($variantData['attributes']) 
-                            ? json_decode($variantData['attributes'], true) 
+                    if (! empty($variantData['attributes'])) {
+                        $attributesJson = is_string($variantData['attributes'])
+                            ? json_decode($variantData['attributes'], true)
                             : $variantData['attributes'];
 
                         foreach ($attributesJson as $attr) {
                             $dbAttr = Attribute::where('name', $attr['name'])
                                 ->where('scope', Scope::VARIANT)
                                 ->first();
-                            
+
                             if ($dbAttr) {
                                 $variant->attributes()->attach($dbAttr->id, [
-                                    'value' => $attr['value']
+                                    'value' => $attr['value'],
                                 ]);
                             }
                         }
@@ -253,14 +254,14 @@ class ProductController extends Controller
             if ($request->has('product_attributes')) {
                 $syncData = [];
                 foreach ($request->product_attributes as $id => $value) {
-                    if (!empty($value)) {
+                    if (! empty($value)) {
                         $syncData[$id] = ['value' => $value];
                     }
                 }
                 $product->attributes()->sync($syncData);
             }
 
-            // Handle images
+            // Handle Images
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $file) {
                     $path = ImageHelper::store($file, 'products');
@@ -273,7 +274,7 @@ class ProductController extends Controller
             }
 
             return redirect()->route('admin.products.index')
-                ->with('success', 'Product created successfully with ' . $product->variants()->count() . ' variants.');
+                ->with('success', 'Product created successfully with '.$product->variants()->count().' variants.');
         });
     }
 
@@ -282,17 +283,8 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        $product = Product::with(['images', 'attributes', 'variants.attributes'])->findOrFail(Crypt::decryptString($id));
+        $product = Product::with(['attributes', 'variants.attributes', 'images'])->findOrFail(Crypt::decryptString($id));
         $categories = $this->getHierarchicalCategories();
-
-        // Format images for the file component
-        $images = $product->images->map(function ($img) {
-            return [
-                'path' => $img->file,
-                'name' => basename($img->file),
-                'type' => 'image',
-            ];
-        })->toArray();
 
         // Get product-scoped attributes with values
         $productAttributes = \App\Models\Attribute::where('scope', \App\Enums\Scope::PRODUCT)
@@ -310,7 +302,7 @@ class ProductController extends Controller
 
         foreach ($product->variants as $variant) {
             foreach ($variant->attributes as $attr) {
-                if (!isset($tempOptions[$attr->id])) {
+                if (! isset($tempOptions[$attr->id])) {
                     $fullAttr = $variantAttributes->find($attr->id) ?: \App\Models\Attribute::with('values')->find($attr->id);
                     $tempOptions[$attr->id] = [
                         'attribute_id' => $attr->id,
@@ -319,14 +311,14 @@ class ProductController extends Controller
                         'isDbAttribute' => true,
                         'isDone' => true,
                         'values' => [],
-                        'availableValues' => $fullAttr ? $fullAttr->values->map(fn($v) => [
+                        'availableValues' => $fullAttr ? $fullAttr->values->map(fn ($v) => [
                             'name' => $v->value,
                             'value' => $v->value,
-                            'code' => $v->code
-                        ])->toArray() : []
+                            'code' => $v->code,
+                        ])->toArray() : [],
                     ];
                 }
-                if (!in_array($attr->pivot->value, $tempOptions[$attr->id]['values'])) {
+                if (! in_array($attr->pivot->value, $tempOptions[$attr->id]['values'])) {
                     $tempOptions[$attr->id]['values'][] = $attr->pivot->value;
                 }
             }
@@ -346,17 +338,16 @@ class ProductController extends Controller
                     return [
                         'attribute_id' => $attr->id,
                         'name' => $attr->name,
-                        'value' => $attr->pivot->value
+                        'value' => $attr->pivot->value,
                     ];
-                })
+                }),
             ];
         });
 
         return view('admin.products.edit', compact(
-            'product', 
-            'categories', 
-            'images', 
-            'productAttributes', 
+            'product',
+            'categories',
+            'productAttributes',
             'variantAttributes',
             'initialOptions',
             'initialVariants'
@@ -413,7 +404,7 @@ class ProductController extends Controller
             if ($request->has('variant_options')) {
                 foreach ($request->variant_options as $option) {
                     $attribute = null;
-                    if (!empty($option['attribute_id'])) {
+                    if (! empty($option['attribute_id'])) {
                         $attribute = Attribute::find($option['attribute_id']);
                     } else {
                         $attribute = Attribute::firstOrCreate(
@@ -422,15 +413,15 @@ class ProductController extends Controller
                     }
 
                     if ($attribute) {
-                        if (!$attribute->categories()->where('category_id', $product->category_id)->exists()) {
+                        if (! $attribute->categories()->where('category_id', $product->category_id)->exists()) {
                             $attribute->categories()->attach($product->category_id);
                         }
 
-                        if (!empty($option['values'])) {
+                        if (! empty($option['values'])) {
                             foreach ($option['values'] as $value) {
                                 AttributeValue::firstOrCreate([
                                     'attribute_id' => $attribute->id,
-                                    'value' => $value
+                                    'value' => $value,
                                 ]);
                             }
                         }
@@ -442,7 +433,7 @@ class ProductController extends Controller
             if ($request->has('variants')) {
                 // For simplicity in this implementation, we recreate variants.
                 // In a production app, you might want to match by SKU or attributes to preserve IDs.
-                $product->variants()->delete(); 
+                $product->variants()->delete();
 
                 foreach ($request->variants as $variantData) {
                     $variant = $product->variants()->create([
@@ -452,19 +443,19 @@ class ProductController extends Controller
                         'status' => true,
                     ]);
 
-                    if (!empty($variantData['attributes'])) {
-                        $attributesJson = is_string($variantData['attributes']) 
-                            ? json_decode($variantData['attributes'], true) 
+                    if (! empty($variantData['attributes'])) {
+                        $attributesJson = is_string($variantData['attributes'])
+                            ? json_decode($variantData['attributes'], true)
                             : $variantData['attributes'];
 
                         foreach ($attributesJson as $attr) {
                             $dbAttr = Attribute::where('name', $attr['name'])
                                 ->where('scope', Scope::VARIANT)
                                 ->first();
-                            
+
                             if ($dbAttr) {
                                 $variant->attributes()->attach($dbAttr->id, [
-                                    'value' => $attr['value']
+                                    'value' => $attr['value'],
                                 ]);
                             }
                         }
@@ -483,11 +474,13 @@ class ProductController extends Controller
                 $product->attributes()->sync($syncData);
             }
 
-            // Handle existing images deletion
-            $existingFiles = $request->input('existing_files', []);
-            foreach ($product->images as $img) {
-                if (! in_array($img->file, $existingFiles)) {
-                    $img->delete();
+            // Handle existing files deletion
+            if ($request->has('delete_images')) {
+                foreach ($request->delete_images as $imageId) {
+                    $image = $product->images()->find($imageId);
+                    if ($image) {
+                        $image->delete();
+                    }
                 }
             }
 
@@ -558,7 +551,7 @@ class ProductController extends Controller
     {
         $product = Product::findOrFail(Crypt::decryptString($id));
 
-        $product->is_approved = !$product->is_approved;
+        $product->is_approved = ! $product->is_approved;
         $product->save();
 
         if (request()->ajax()) {

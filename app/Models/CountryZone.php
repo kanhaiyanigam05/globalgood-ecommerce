@@ -1,11 +1,13 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
 class CountryZone extends Model
 {
-    protected $table    = 'country_zones';
+    protected $table = 'country_zones';
+
     protected $fillable = [
         'country_id', 'name', 'code',
     ];
@@ -14,6 +16,7 @@ class CountryZone extends Model
     {
         return $this->belongsTo(Country::class);
     }
+
     public function taxOverrides()
     {
         return $this->hasMany(TaxOverride::class, 'country_zone_id');

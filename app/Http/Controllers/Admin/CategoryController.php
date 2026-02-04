@@ -28,6 +28,7 @@ class CategoryController extends Controller
                 ->editColumn('title', fn ($row) => ucwords($row->title ?? '-'))
                 ->editColumn('image', function ($row) {
                     $src = $row->image ? asset("uploads/{$row->image}") : "https://placehold.co/100x100?text={$row->title}"; // Fallback image?
+
                     return '<img src="'.$src.'" class="img-thumbnail" width="50">';
                 })
                 ->editColumn('products_count', fn ($row) => $row->products_count)

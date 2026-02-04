@@ -55,21 +55,14 @@
                 </ul>
             </li>
             <li class="no-sub">
-                <a href="{{ route('admin.discounts.index') }}"
-                    aria-expanded="{{ request()->routeIs('admin.discounts.*') ? 'true' : 'false' }}">
-                    <i class="ph ph-tag f-s-20 me-2" style="transform: translateY(2px);"></i>
-                    Discounts
-                </a>
-            </li>
-            <li class="no-sub">
-                <a href="{{ route('admin.market-sales.index') }}"
-                    aria-expanded="{{ request()->routeIs('admin.market-sales.*') ? 'true' : 'false' }}">
-                    <i class="ph ph-percent f-s-20 me-2" style="transform: translateY(2px);"></i>
-                    Market Sales
-                </a>
-            </li>
-            <li class="no-sub">
                 <a href="{{ route('admin.customers.index') }}"
+                    aria-expanded="{{ request()->routeIs('admin.customers.*') ? 'true' : 'false' }}">
+                    <svg stroke="currentColor" stroke-width="1.5">
+                        <use xlink:href="{{ asset('admins/svg/_sprite.svg') }}#customers"></use>
+                    </svg>
+                    Customers
+                </a>
+            </li>
             {{-- 
             <li class="menu-title"><span>Component</span></li>
             <li>
@@ -373,15 +366,6 @@
             </li> --}}
 
 
-            <li class="no-sub">
-                <a href="{{ route('admin.settings.index') }}"
-                    aria-expanded="{{ request()->routeIs('admin.settings.*') ? 'true' : 'false' }}">
-                    <svg stroke="currentColor" stroke-width="1.5">
-                        <use xlink:href="{{ asset('admins/svg/_sprite.svg') }}#settings"></use>
-                    </svg>
-                    Settings
-                </a>
-            </li>
         </ul>
     </div>
 

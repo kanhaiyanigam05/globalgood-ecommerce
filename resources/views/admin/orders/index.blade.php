@@ -41,7 +41,8 @@
                                         <th>Order</th>
                                         <th>Date</th>
                                         <th>Customer</th>
-                                        <th>Status</th>
+                                        <th>Payment</th>
+                                        <th>Fulfillment</th>
                                         <th>Total</th>
                                         <th>Action</th>
                                     </tr>
@@ -67,15 +68,14 @@
                 processing: true,
                 serverSide: true,
                 ordering: false,
-                columns: [
-                    {
+                columns: [{
                         data: 'order_number',
                         name: 'order_number'
                     },
                     {
                         data: 'created_at',
                         name: 'created_at',
-                        render: function(data){
+                        render: function(data) {
                             return data ? new Date(data).toLocaleDateString() : '';
                         }
                     },
@@ -84,8 +84,12 @@
                         name: 'customer.first_name'
                     },
                     {
-                        data: 'status',
-                        name: 'status'
+                        data: 'payment_status',
+                        name: 'payment_status'
+                    },
+                    {
+                        data: 'fulfillment_status',
+                        name: 'fulfillment_status'
                     },
                     {
                         data: 'total',

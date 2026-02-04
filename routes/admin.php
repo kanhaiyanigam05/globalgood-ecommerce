@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CollectionController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\VariantController;
 use Illuminate\Support\Facades\Route;
@@ -82,7 +83,7 @@ Route::prefix('management')->as('admin.')->group(function () {
         Route::prefix('settings')->as('settings.')->group(function () {
             Route::get('/', [App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('index');
             Route::post('/general', [App\Http\Controllers\Admin\SettingsController::class, 'updateGeneral'])->name('general.update');
-            
+
             // Shipping
             Route::get('/shipping', [App\Http\Controllers\Admin\SettingsController::class, 'shipping'])->name('shipping');
             Route::get('/shipping/{profile}/edit', [App\Http\Controllers\Admin\SettingsController::class, 'shippingEdit'])->name('shipping.edit');
@@ -99,5 +100,15 @@ Route::prefix('management')->as('admin.')->group(function () {
             Route::post('/tax/save', [App\Http\Controllers\Admin\SettingsController::class, 'saveTax'])->name('tax.save');
             Route::post('/tax/update', [App\Http\Controllers\Admin\SettingsController::class, 'updateTax'])->name('tax.update');
         });
+        Route::get('customers/get-zones', [CustomerController::class, 'getZones'])->name('customers.get-zones');
+        Route::resource('customers', CustomerController::class);
+        // Orders
+        Route::get('orders/search-products', [OrderController::class, 'searchProducts'])->name('orders.search-products');
+        Route::get('orders/search-customers', [OrderController::class, 'searchCustomers'])->name('orders.search-customers');
+        Route::post('orders/store-customer', [OrderController::class, 'storeCustomer'])->name('orders.store-customer');
+        Route::get('orders/get-addresses', [OrderController::class, 'getAddresses'])->name('orders.get-addresses');
+        Route::post('orders/store-address', [OrderController::class, 'storeAddress'])->name('orders.store-address');
+        Route::post('orders/{order}/fulfill', [OrderController::class, 'fulfill'])->name('orders.fulfill');
+        Route::resource('orders', OrderController::class);
     });
 });

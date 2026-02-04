@@ -26,16 +26,20 @@
                     </div>
                 </div>
 
-                <x-forms.form :action="route('admin.collections.store')" method="post" enctype="multipart/form-data" varient="reactive" class="row">
+                <x-forms.form :action="route('admin.collections.store')" method="post" enctype="multipart/form-data" varient="reactive"
+                    class="row">
                     <div class="col-lg-8">
                         <!-- Main Details -->
                         <div class="card shadow-sm mb-4">
                             <div class="card-body">
                                 <div class="mb-4">
-                                    <x-forms.input id="title" name="title" label="Title" placeholder="e.g. Summer collection, Under $100, Staff picks" :value="old('title')" :error="$errors->first('title')" required />
+                                    <x-forms.input id="title" name="title" label="Title"
+                                        placeholder="e.g. Summer collection, Under $100, Staff picks" :value="old('title')"
+                                        :error="$errors->first('title')" required />
                                 </div>
                                 <div class="mb-2">
-                                    <x-forms.editor id="description" name="description" label="Description" :value="old('description')" :error="$errors->first('description')" placeholder="Enter collection description..." />
+                                    <x-forms.editor id="description" name="description" label="Description"
+                                        :value="old('description')" :error="$errors->first('description')" placeholder="Enter collection description..." />
                                 </div>
                             </div>
                         </div>
@@ -47,17 +51,20 @@
                             </div>
                             <div class="card-body">
                                 <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="type" id="type_manual" value="manual" {{ old('type', 'manual') === 'manual' ? 'checked' : '' }}>
+                                    <input class="form-check-input" type="radio" name="type" id="type_manual"
+                                        value="manual" {{ old('type', 'manual') === 'manual' ? 'checked' : '' }}>
                                     <label class="form-check-label" for="type_manual">
                                         <strong>Manual</strong>
                                         <p class="text-muted small mb-0">Add products to this collection one by one.</p>
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="type" id="type_smart" value="smart" {{ old('type') === 'smart' ? 'checked' : '' }}>
+                                    <input class="form-check-input" type="radio" name="type" id="type_smart"
+                                        value="smart" {{ old('type') === 'smart' ? 'checked' : '' }}>
                                     <label class="form-check-label" for="type_smart">
                                         <strong>Smart</strong>
-                                        <p class="text-muted small mb-0">Existing and future products that match the conditions you set will automatically be added to this collection.</p>
+                                        <p class="text-muted small mb-0">Existing and future products that match the
+                                            conditions you set will automatically be added to this collection.</p>
                                     </label>
                                 </div>
                                 @error('type')
@@ -67,7 +74,8 @@
                         </div>
 
                         <!-- Smart Collection - Conditions (Initially Hidden) -->
-                        <div id="smart-conditions-wrapper" class="card shadow-sm mb-4 {{ old('type') === 'smart' ? '' : 'd-none' }}">
+                        <div id="smart-conditions-wrapper"
+                            class="card shadow-sm mb-4 {{ old('type') === 'smart' ? '' : 'd-none' }}">
                             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                                 <h6 class="mb-0">Conditions</h6>
                             </div>
@@ -76,11 +84,15 @@
                                     <p class="mb-2 fw-medium">Products must match:</p>
                                     <div class="d-flex gap-3">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="condition_type" id="cond_all" value="all" {{ old('condition_type', 'all') === 'all' ? 'checked' : '' }}>
+                                            <input class="form-check-input" type="radio" name="condition_type"
+                                                id="cond_all" value="all"
+                                                {{ old('condition_type', 'all') === 'all' ? 'checked' : '' }}>
                                             <label class="form-check-label" for="cond_all">all conditions</label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="condition_type" id="cond_any" value="any" {{ old('condition_type') === 'any' ? 'checked' : '' }}>
+                                            <input class="form-check-input" type="radio" name="condition_type"
+                                                id="cond_any" value="any"
+                                                {{ old('condition_type') === 'any' ? 'checked' : '' }}>
                                             <label class="form-check-label" for="cond_any">any condition</label>
                                         </div>
                                     </div>
@@ -90,29 +102,37 @@
                                 </div>
 
                                 <div id="conditions-list">
-                                    @if(old('conditions'))
-                                        @foreach(old('conditions') as $index => $condition)
+                                    @if (old('conditions'))
+                                        @foreach (old('conditions') as $index => $condition)
                                             <div class="condition-row row gx-2 mb-2">
                                                 <div class="col-4">
-                                                    <select name="conditions[{{ $index }}][field]" class="form-select condition-field">
-                                                        @foreach(['title'=>'Product title','type'=>'Product type','category'=>'Category','price'=>'Product price','compare_at_price'=>'Compare at price','inventory_stock'=>'Inventory stock','tag'=>'Product tag'] as $val => $label)
-                                                            <option value="{{ $val }}" {{ $condition['field'] === $val ? 'selected' : '' }}>{{ $label }}</option>
+                                                    <select name="conditions[{{ $index }}][field]"
+                                                        class="form-select condition-field">
+                                                        @foreach (['title' => 'Product title', 'type' => 'Product type', 'category' => 'Category', 'price' => 'Product price', 'compare_at_price' => 'Compare at price', 'inventory_stock' => 'Inventory stock', 'tag' => 'Product tag'] as $val => $label)
+                                                            <option value="{{ $val }}"
+                                                                {{ $condition['field'] === $val ? 'selected' : '' }}>
+                                                                {{ $label }}</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
                                                 <div class="col-3">
-                                                    <select name="conditions[{{ $index }}][operator]" class="form-select condition-operator" data-initial="{{ $condition['operator'] }}">
+                                                    <select name="conditions[{{ $index }}][operator]"
+                                                        class="form-select condition-operator"
+                                                        data-initial="{{ $condition['operator'] }}">
                                                         {{-- Populated by JS --}}
                                                     </select>
                                                 </div>
                                                 <div class="col-4">
-                                                    <input type="text" name="conditions[{{ $index }}][value]" class="form-control condition-value" value="{{ $condition['value'] }}" placeholder="Value">
+                                                    <input type="text" name="conditions[{{ $index }}][value]"
+                                                        class="form-control condition-value"
+                                                        value="{{ $condition['value'] }}" placeholder="Value">
                                                     @error("conditions.{$index}.value")
                                                         <div class="text-danger small">{{ $message }}</div>
                                                     @enderror
                                                 </div>
                                                 <div class="col-1">
-                                                    <button type="button" class="btn btn-link text-danger remove-condition-btn p-0">
+                                                    <button type="button"
+                                                        class="btn btn-link text-danger remove-condition-btn p-0">
                                                         <i class="ph ph-trash f-s-18"></i>
                                                     </button>
                                                 </div>
@@ -124,17 +144,20 @@
                                     <div class="text-danger small mt-2">{{ $message }}</div>
                                 @enderror
 
-                                <button type="button" class="btn btn-outline-secondary btn-sm mt-3" id="add-condition-btn">
+                                <button type="button" class="btn btn-outline-secondary btn-sm mt-3"
+                                    id="add-condition-btn">
                                     <i class="ph ph-plus"></i> Add another condition
                                 </button>
                             </div>
                         </div>
 
                         <!-- Manual Collection - Products (Initially Visible) -->
-                        <div id="manual-products-wrapper" class="card shadow-sm mb-4 {{ old('type', 'manual') === 'manual' ? '' : 'd-none' }}">
+                        <div id="manual-products-wrapper"
+                            class="card shadow-sm mb-4 {{ old('type', 'manual') === 'manual' ? '' : 'd-none' }}">
                             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                                 <h6 class="mb-0">Products</h6>
-                                <button type="button" class="btn btn-outline-secondary btn-sm" id="browse-products-btn">Browse</button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                    id="browse-products-btn">Browse</button>
                             </div>
                             <div class="card-body">
                                 @error('product_ids')
@@ -144,10 +167,13 @@
                                 @enderror
                                 <div class="mb-3">
                                     <div class="input-group">
-                                        <span class="input-group-text bg-white border-end-0"><i class="ph ph-magnifying-glass"></i></span>
-                                        <input type="text" id="product-search" class="form-control border-start-0" placeholder="Search products...">
+                                        <span class="input-group-text bg-white border-end-0"><i
+                                                class="ph ph-magnifying-glass"></i></span>
+                                        <input type="text" id="product-search" class="form-control border-start-0"
+                                            placeholder="Search products...">
                                     </div>
-                                    <div id="search-results-dropdown" class="dropdown-menu w-100 shadow-sm" style="max-height: 250px; overflow-y: auto;"></div>
+                                    <div id="search-results-dropdown" class="dropdown-menu w-100 shadow-sm"
+                                        style="max-height: 250px; overflow-y: auto;"></div>
                                 </div>
 
                                 <div class="table-responsive">
@@ -188,7 +214,8 @@
                                     <x-forms.switch name="status" id="status" :checked="true" />
                                 </div>
                                 <hr class="my-3 opacity-10">
-                                <p class="small text-muted mb-0">Collections status determines visibility on your storefront.</p>
+                                <p class="small text-muted mb-0">Collections status determines visibility on your
+                                    storefront.</p>
                             </div>
                         </div>
 
@@ -196,9 +223,11 @@
                             <div class="card-header bg-white">
                                 <h6 class="mb-0">Collection image</h6>
                             </div>
-                            <div class="card-body text-center">
-                                <x-forms.file name="image" label="" :error="$errors->first('image')" />
-                                <p class="small text-muted mt-2">Upload an image to represent this collection.</p>
+                            <div class="card-body">
+                                <x-forms.file name="image" label="Collection Image" :error="$errors->first('image')"
+                                    accept="image/*" />
+                                <p class="small text-muted mt-2">Upload or select an image to represent this collection.
+                                </p>
                             </div>
                         </div>
 
@@ -240,7 +269,8 @@
                 </select>
             </div>
             <div class="col-4">
-                <input type="text" name="conditions[INDEX][value]" class="form-control condition-value" placeholder="Value">
+                <input type="text" name="conditions[INDEX][value]" class="form-control condition-value"
+                    placeholder="Value">
             </div>
             <div class="col-1">
                 <button type="button" class="btn btn-link text-danger remove-condition-btn p-0">
@@ -252,7 +282,9 @@
 
     <template id="selected-product-row">
         <tr>
-            <td><div class="rounded bg-light" style="width: 40px; height: 40px; border: 1px solid #eee;"></div></td>
+            <td>
+                <div class="rounded bg-light" style="width: 40px; height: 40px; border: 1px solid #eee;"></div>
+            </td>
             <td>
                 <div class="fw-medium">PRODUCT_TITLE</div>
                 <input type="hidden" name="product_ids[]" value="PRODUCT_ID">
@@ -269,175 +301,182 @@
 @endsection
 
 @push('scripts:after')
-<script>
-    $(document).ready(function() {
-        // Toggle Manual/Smart sections
-        $('input[name="type"]').change(function() {
-            if (this.value === 'smart') {
-                $('#smart-conditions-wrapper').removeClass('d-none');
-                $('#manual-products-wrapper').addClass('d-none');
-            } else {
-                $('#smart-conditions-wrapper').addClass('d-none');
-                $('#manual-products-wrapper').removeClass('d-none');
-            }
-        });
-
-        // Condition Builder Logic
-        let conditionIndex = {{ old('conditions') ? count(old('conditions')) : 0 }};
-        const fieldOperators = {
-            'title': ['equals', 'not_equals', 'contains', 'not_contains', 'starts_with', 'ends_with', 'is_empty', 'is_not_empty'],
-            'type': ['equals', 'not_equals'],
-            'category': ['equals', 'not_equals'],
-            'price': ['equals', 'not_equals', 'greater_than', 'less_than'],
-            'compare_at_price': ['equals', 'not_equals', 'greater_than', 'less_than'],
-            'inventory_stock': ['equals', 'not_equals', 'greater_than', 'less_than'],
-            'tag': ['equals', 'not_equals', 'contains', 'not_contains']
-        };
-
-        const operatorLabels = {
-            'equals': 'is equal to',
-            'not_equals': 'is not equal to',
-            'contains': 'contains',
-            'not_contains': 'does not contain',
-            'greater_than': 'is greater than',
-            'less_than': 'is less than',
-            'starts_with': 'starts with',
-            'ends_with': 'ends with',
-            'is_empty': 'is empty',
-            'is_not_empty': 'is not empty'
-        };
-
-        function updateOperators(row) {
-            const field = row.find('.condition-field').val();
-            const operatorSelect = row.find('.condition-operator');
-            const currentValue = operatorSelect.val() || operatorSelect.data('initial');
-            
-            operatorSelect.empty();
-            const available = fieldOperators[field] || fieldOperators['title'];
-            
-            available.forEach(op => {
-                operatorSelect.append(`<option value="${op}" ${currentValue == op ? 'selected' : ''}>${operatorLabels[op]}</option>`);
+    <script>
+        $(document).ready(function() {
+            // Toggle Manual/Smart sections
+            $('input[name="type"]').change(function() {
+                if (this.value === 'smart') {
+                    $('#smart-conditions-wrapper').removeClass('d-none');
+                    $('#manual-products-wrapper').addClass('d-none');
+                } else {
+                    $('#smart-conditions-wrapper').addClass('d-none');
+                    $('#manual-products-wrapper').removeClass('d-none');
+                }
             });
 
-            // Toggle value input for empty/not empty
-            const valueInput = row.find('.condition-value');
-            if (['is_empty', 'is_not_empty'].includes(operatorSelect.val())) {
-                valueInput.addClass('invisible');
-            } else {
-                valueInput.removeClass('invisible');
-            }
-        }
+            // Condition Builder Logic
+            let conditionIndex = {{ old('conditions') ? count(old('conditions')) : 0 }};
+            const fieldOperators = {
+                'title': ['equals', 'not_equals', 'contains', 'not_contains', 'starts_with', 'ends_with',
+                    'is_empty', 'is_not_empty'
+                ],
+                'type': ['equals', 'not_equals'],
+                'category': ['equals', 'not_equals'],
+                'price': ['equals', 'not_equals', 'greater_than', 'less_than'],
+                'compare_at_price': ['equals', 'not_equals', 'greater_than', 'less_than'],
+                'inventory_stock': ['equals', 'not_equals', 'greater_than', 'less_than'],
+                'tag': ['equals', 'not_equals', 'contains', 'not_contains']
+            };
 
-        function addCondition() {
-            const template = $('#condition-row-template').html();
-            const html = $(template.replace(/INDEX/g, conditionIndex++));
-            $('#conditions-list').append(html);
-            updateOperators(html);
-        }
+            const operatorLabels = {
+                'equals': 'is equal to',
+                'not_equals': 'is not equal to',
+                'contains': 'contains',
+                'not_contains': 'does not contain',
+                'greater_than': 'is greater than',
+                'less_than': 'is less than',
+                'starts_with': 'starts with',
+                'ends_with': 'ends with',
+                'is_empty': 'is empty',
+                'is_not_empty': 'is not empty'
+            };
 
-        // Initialize existing rows (from old input)
-        $('.condition-row').each(function() {
-            updateOperators($(this));
-        });
+            function updateOperators(row) {
+                const field = row.find('.condition-field').val();
+                const operatorSelect = row.find('.condition-operator');
+                const currentValue = operatorSelect.val() || operatorSelect.data('initial');
 
-        $('#add-condition-btn').click(addCondition);
-        
-        $(document).on('change', '.condition-field', function() {
-            updateOperators($(this).closest('.condition-row'));
-        });
+                operatorSelect.empty();
+                const available = fieldOperators[field] || fieldOperators['title'];
 
-        $(document).on('change', '.condition-operator', function() {
-            const row = $(this).closest('.condition-row');
-            const valueInput = row.find('.condition-value');
-            if (['is_empty', 'is_not_empty'].includes($(this).val())) {
-                valueInput.addClass('invisible');
-            } else {
-                valueInput.removeClass('invisible');
-            }
-        });
+                available.forEach(op => {
+                    operatorSelect.append(
+                        `<option value="${op}" ${currentValue == op ? 'selected' : ''}>${operatorLabels[op]}</option>`
+                        );
+                });
 
-        $(document).on('click', '.remove-condition-btn', function() {
-            $(this).closest('.condition-row').remove();
-            if ($('.condition-row').length === 0) addCondition();
-        });
-
-        // Add initial condition if none exist
-        if ($('.condition-row').length === 0) {
-            addCondition();
-        }
-
-        // Product Search Logic for Manual Collection
-        let searchTimeout;
-        $('#product-search').on('input', function() {
-            const query = $(this).val();
-            clearTimeout(searchTimeout);
-            
-            if (query.length < 2) {
-                $('#search-results-dropdown').removeClass('show').empty();
-                return;
+                // Toggle value input for empty/not empty
+                const valueInput = row.find('.condition-value');
+                if (['is_empty', 'is_not_empty'].includes(operatorSelect.val())) {
+                    valueInput.addClass('invisible');
+                } else {
+                    valueInput.removeClass('invisible');
+                }
             }
 
-            searchTimeout = setTimeout(() => {
-                $.get("{{ route('admin.collections.search-products') }}", { q: query }, function(data) {
-                    const dropdown = $('#search-results-dropdown');
-                    dropdown.empty();
-                    
-                    if (data.length > 0) {
-                        data.forEach(product => {
-                            dropdown.append(`
+            function addCondition() {
+                const template = $('#condition-row-template').html();
+                const html = $(template.replace(/INDEX/g, conditionIndex++));
+                $('#conditions-list').append(html);
+                updateOperators(html);
+            }
+
+            // Initialize existing rows (from old input)
+            $('.condition-row').each(function() {
+                updateOperators($(this));
+            });
+
+            $('#add-condition-btn').click(addCondition);
+
+            $(document).on('change', '.condition-field', function() {
+                updateOperators($(this).closest('.condition-row'));
+            });
+
+            $(document).on('change', '.condition-operator', function() {
+                const row = $(this).closest('.condition-row');
+                const valueInput = row.find('.condition-value');
+                if (['is_empty', 'is_not_empty'].includes($(this).val())) {
+                    valueInput.addClass('invisible');
+                } else {
+                    valueInput.removeClass('invisible');
+                }
+            });
+
+            $(document).on('click', '.remove-condition-btn', function() {
+                $(this).closest('.condition-row').remove();
+                if ($('.condition-row').length === 0) addCondition();
+            });
+
+            // Add initial condition if none exist
+            if ($('.condition-row').length === 0) {
+                addCondition();
+            }
+
+            // Product Search Logic for Manual Collection
+            let searchTimeout;
+            $('#product-search').on('input', function() {
+                const query = $(this).val();
+                clearTimeout(searchTimeout);
+
+                if (query.length < 2) {
+                    $('#search-results-dropdown').removeClass('show').empty();
+                    return;
+                }
+
+                searchTimeout = setTimeout(() => {
+                    $.get("{{ route('admin.collections.search-products') }}", {
+                        q: query
+                    }, function(data) {
+                        const dropdown = $('#search-results-dropdown');
+                        dropdown.empty();
+
+                        if (data.length > 0) {
+                            data.forEach(product => {
+                                dropdown.append(`
                                 <button type="button" class="dropdown-item d-flex justify-content-between align-items-center py-2 add-product-item" 
                                     data-id="${product.id}" data-title="${product.title}" data-price="${(product.price / 100).toFixed(2)}">
                                     <span>${product.title}</span>
                                     <span class="text-muted small">$${(product.price / 100).toFixed(2)}</span>
                                 </button>
                             `);
-                        });
-                        dropdown.addClass('show');
-                    } else {
-                        dropdown.removeClass('show');
-                    }
-                });
-            }, 300);
-        });
+                            });
+                            dropdown.addClass('show');
+                        } else {
+                            dropdown.removeClass('show');
+                        }
+                    });
+                }, 300);
+            });
 
-        // Add product from search
-        $(document).on('click', '.add-product-item', function() {
-            const id = $(this).data('id');
-            const title = $(this).data('title');
-            const price = $(this).data('price');
+            // Add product from search
+            $(document).on('click', '.add-product-item', function() {
+                const id = $(this).data('id');
+                const title = $(this).data('title');
+                const price = $(this).data('price');
 
-            // Check if already added
-            if ($(`input[name="product_ids[]"][value="${id}"]`).length > 0) {
-                window.toast.warning('Product already added');
-                return;
-            }
+                // Check if already added
+                if ($(`input[name="product_ids[]"][value="${id}"]`).length > 0) {
+                    window.toast.warning('Product already added');
+                    return;
+                }
 
-            $('#no-products-placeholder').hide();
-            
-            const template = $('#selected-product-row').html();
-            const html = template.replace(/PRODUCT_TITLE/g, title)
-                                .replace(/PRODUCT_ID/g, id)
-                                .replace(/PRODUCT_PRICE/g, price);
-            
-            $('#selected-products-table tbody').append(html);
-            $('#product-search').val('');
-            $('#search-results-dropdown').removeClass('show');
-        });
+                $('#no-products-placeholder').hide();
 
-        // Remove product
-        $(document).on('click', '.remove-product-btn', function() {
-            $(this).closest('tr').remove();
-            if ($('#selected-products-table tbody tr').length === 1) { // Only placeholder row left conceptually
-                 $('#no-products-placeholder').show();
-            }
-        });
+                const template = $('#selected-product-row').html();
+                const html = template.replace(/PRODUCT_TITLE/g, title)
+                    .replace(/PRODUCT_ID/g, id)
+                    .replace(/PRODUCT_PRICE/g, price);
 
-        // Hide dropdown on clicking outside
-        $(document).on('click', function(e) {
-            if (!$(e.target).closest('#product-search, #search-results-dropdown').length) {
+                $('#selected-products-table tbody').append(html);
+                $('#product-search').val('');
                 $('#search-results-dropdown').removeClass('show');
-            }
+            });
+
+            // Remove product
+            $(document).on('click', '.remove-product-btn', function() {
+                $(this).closest('tr').remove();
+                if ($('#selected-products-table tbody tr').length ===
+                    1) { // Only placeholder row left conceptually
+                    $('#no-products-placeholder').show();
+                }
+            });
+
+            // Hide dropdown on clicking outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('#product-search, #search-results-dropdown').length) {
+                    $('#search-results-dropdown').removeClass('show');
+                }
+            });
         });
-    });
-</script>
+    </script>
 @endpush
