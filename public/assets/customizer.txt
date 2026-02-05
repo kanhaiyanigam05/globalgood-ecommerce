@@ -1,0 +1,20 @@
+<div class="offcanvas-header border-bottom">
+    <h5 class="offcanvas-title" id="customizerLabel">Customizer</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+</div>
+<div class="offcanvas-body">
+    <div class="customizer-box">
+        <h6 class="mb-2">Sidebar Option</h6>
+        <ul class="sidebar-option">
+            <li class="vertical-sidebar selected">
+                <i class="ph-duotone ph-sidebar-simple f-s-20"></i> Vertical
+            </li>
+            <li class="horizontal-sidebar">
+                <i class="ph-duotone ph-sidebar-simple f-s-20 fa-rotate-90"></i> Horizontal
+            </li>
+            <li class="dark-sidebar">
+                <i class="ph-duotone ph-sidebar-simple f-s-20"></i> Dark
+            </li>
+        </ul>
+    </div>
+</div>
