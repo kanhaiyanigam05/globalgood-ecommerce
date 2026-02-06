@@ -2,16 +2,15 @@
 
 namespace App\Models;
 
+use App\Contracts\LinkableInterface;
+use App\Traits\HandlesSmartCollections;
+use App\Traits\IsLinkable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class Collection extends Model
+class Collection extends Model implements LinkableInterface
 {
-use App\Traits\HandlesSmartCollections;
-
-class Collection extends Model
-{
-    use HandlesSmartCollections;
+    use HandlesSmartCollections, IsLinkable;
 
     protected $fillable = [
         'title',
@@ -83,4 +82,10 @@ class Collection extends Model
             }
         });
     }
+    
+    public function getLinkableUrl(): string
+    {
+        return route('collection.item', $this->slug);
+    }
+
 }

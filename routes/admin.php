@@ -63,18 +63,29 @@ Route::prefix('management')->as('admin.')->group(function () {
         Route::get('collections/search-products', [CollectionController::class, 'searchProducts'])->name('collections.search-products');
         Route::resource('collections', CollectionController::class);
 
+        // Menus
+        Route::get('menus/search-linkables', [App\Http\Controllers\Admin\MenuController::class, 'searchLinkables'])->name('menus.search-linkables');
+        Route::resource('menus', App\Http\Controllers\Admin\MenuController::class);
+
         // Vendors
         Route::resource('vendors', App\Http\Controllers\Admin\VendorController::class)->only(['index', 'show']);
         Route::post('vendors/{id}/status', [App\Http\Controllers\Admin\VendorController::class, 'updateStatus'])->name('vendors.updateStatus');
         Route::post('vendor-documents/{id}/verify', [App\Http\Controllers\Admin\VendorController::class, 'verifyDocument'])->name('vendors.verifyDocument');
         Route::post('vendor-bank/{id}/verify', [App\Http\Controllers\Admin\VendorController::class, 'verifyBank'])->name('vendors.verifyBank');
         // Customers
+        Route::get('customers/get-zones', [CustomerController::class, 'getZones'])->name('customers.get-zones');
         Route::resource('customers', CustomerController::class);
 
         // Orders
-        Route::get('orders/search-products', [App\Http\Controllers\Admin\OrderController::class, 'searchProducts'])->name('orders.search-products');
-        Route::get('orders/search-customers', [App\Http\Controllers\Admin\OrderController::class, 'searchCustomers'])->name('orders.search-customers');
-        Route::resource('orders', App\Http\Controllers\Admin\OrderController::class);
+        Route::get('orders/search-products', [OrderController::class, 'searchProducts'])->name('orders.search-products');
+        Route::get('orders/search-customers', [OrderController::class, 'searchCustomers'])->name('orders.search-customers');
+        Route::post('orders/store-customer', [OrderController::class, 'storeCustomer'])->name('orders.store-customer');
+        Route::get('orders/get-addresses', [OrderController::class, 'getAddresses'])->name('orders.get-addresses');
+        Route::post('orders/store-address', [OrderController::class, 'storeAddress'])->name('orders.store-address');
+        Route::get('orders/shipping-rates', [OrderController::class, 'getShippingRates'])->name('orders.get-shipping-rates');
+        Route::post('orders/calculate-tax', [OrderController::class, 'calculateTax'])->name('orders.calculate-tax');
+        Route::post('orders/{order}/fulfill', [OrderController::class, 'fulfill'])->name('orders.fulfill');
+        Route::resource('orders', OrderController::class);
 
         // Discounts
         Route::get('discounts/select-type', [App\Http\Controllers\Admin\DiscountController::class, 'selectType'])->name('discounts.select-type');
@@ -105,17 +116,5 @@ Route::prefix('management')->as('admin.')->group(function () {
             Route::post('/tax/save', [App\Http\Controllers\Admin\SettingsController::class, 'saveTax'])->name('tax.save');
             Route::post('/tax/update', [App\Http\Controllers\Admin\SettingsController::class, 'updateTax'])->name('tax.update');
         });
-        Route::get('customers/get-zones', [CustomerController::class, 'getZones'])->name('customers.get-zones');
-        Route::resource('customers', CustomerController::class);
-        // Orders
-        Route::get('orders/search-products', [OrderController::class, 'searchProducts'])->name('orders.search-products');
-        Route::get('orders/search-customers', [OrderController::class, 'searchCustomers'])->name('orders.search-customers');
-        Route::post('orders/store-customer', [OrderController::class, 'storeCustomer'])->name('orders.store-customer');
-        Route::get('orders/get-addresses', [OrderController::class, 'getAddresses'])->name('orders.get-addresses');
-        Route::post('orders/store-address', [OrderController::class, 'storeAddress'])->name('orders.store-address');
-        Route::get('orders/shipping-rates', [OrderController::class, 'getShippingRates'])->name('orders.get-shipping-rates');
-        Route::post('orders/calculate-tax', [OrderController::class, 'calculateTax'])->name('orders.calculate-tax');
-        Route::post('orders/{order}/fulfill', [OrderController::class, 'fulfill'])->name('orders.fulfill');
-        Route::resource('orders', OrderController::class);
     });
 });

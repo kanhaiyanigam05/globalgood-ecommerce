@@ -536,7 +536,7 @@ class OrderController extends Controller
         if (!$addr) return response()->json([]);
         $country = Country::where('name', $addr->country)->first();
         if (!$country) return response()->json([]);
-        return response()->json(DB::table('shipping_rates')->join('shipping_zones', 'shipping_rates.shipping_zone_id', '=', 'shipping_zones.id')->join('shipping_zone_country', 'shipping_zones.id', '=', 'shipping_zone_country.shipping_zone_id')->where('shipping_zone_country.country_id', $country->id)->select('shipping_rates.*')->get());
+        return response()->json(DB::table('shipping_rates')->join('shipping_zones', 'shipping_rates.shipping_zone_id', '=', 'shipping_zones.id')->join('shipping_zone_countries', 'shipping_zones.id', '=', 'shipping_zone_countries.shipping_zone_id')->where('shipping_zone_countries.country_id', $country->id)->select('shipping_rates.*')->get());
     }
 
     public function calculateTax(Request $request)

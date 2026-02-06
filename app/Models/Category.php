@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Contracts\LinkableInterface;
 use App\Helpers\ImageHelper;
+use App\Traits\IsLinkable;
 use Illuminate\Database\Eloquent\Model;
 
-class Category extends Model
+class Category extends Model implements LinkableInterface
 {
+    use IsLinkable;
     protected $fillable = [
         'parent_id',
         'title',
@@ -188,4 +191,10 @@ class Category extends Model
     {
         return $query->where('status', 1);
     }
+    
+    public function getLinkableUrl(): string
+    {
+        return route('category.item', $this->slug);
+    }
+
 }

@@ -25,7 +25,9 @@ class CollectionController extends Controller
                     $image = $row->thumb(50, 50);
                     return '<img src="'.$image.'" class="img-thumbnail" width="50">';
                 })
-                ->addColumn('products_count', fn ($row) => $row->products()->count())
+                ->addColumn('products_count', function ($row) {
+                    return $row->products()->count();
+                })
                 ->addColumn('type', function ($row) {
                     $badge = $row->type === 'smart' ? 'info' : 'secondary';
 

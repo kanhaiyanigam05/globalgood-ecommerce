@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Contracts\LinkableInterface;
 use App\Traits\HandlesSmartCollections;
+use App\Traits\IsLinkable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
-class Product extends Model
+class Product extends Model implements LinkableInterface
 {
-    use HandlesSmartCollections;
+    use HandlesSmartCollections, IsLinkable;
 
     protected $fillable = [
         'category_id',
@@ -105,4 +108,10 @@ class Product extends Model
             $product->syncProductToSmartCollections($product);
         });
     }
+    
+    public function getLinkableUrl(): string
+    {
+        return route('product.item', $this->slug);
+    }
+
 }

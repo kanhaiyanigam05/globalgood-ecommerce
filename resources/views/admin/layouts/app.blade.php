@@ -40,7 +40,7 @@
 </head>
 
 <body>
-    <div class="app-wrapper">
+    <div class="app-wrapper" style="height: 100vh;">
         <div class="loader-wrapper">
             <div class="app-loader">
                 <span></span>

@@ -385,6 +385,15 @@
                     Support
                 </a>
             </li> --}}
+            <li>
+                <a aria-expanded="false" data-bs-toggle="collapse" href="#content-menu">
+                    <i class="ph ph-image f-s-20 me-2" style="transform: translateY(2px);"></i>
+                    Content
+                </a>
+                <ul class="collapse" id="content-menu">
+                    <li><a href="{{ route('admin.menus.index') }}">Menus</a></li>
+                </ul>
+            </li>
             <li class="no-sub">
                 <a href="{{ route('admin.settings.index') }}"
                     aria-expanded="{{ request()->routeIs('admin.settings.*') ? 'true' : 'false' }}">
